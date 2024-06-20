@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../api';
+import { isAxiosError } from '../utils/axiosError'; // Correct import path
+import { AxiosError } from 'axios';
+
+interface AxiosErrorData {
+    detail?: string;
+}
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -11,16 +17,22 @@ const Login: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/users/login/', {
+            const response = await api.post('/users/login/', {
                 username,
                 password,
             });
+            console.log('Login successful', response.data);
             localStorage.setItem('access', response.data.access);
             localStorage.setItem('refresh', response.data.refresh);
             navigate('/');
-        } catch (error) {
-            setError('Invalid username or password');
-            console.error('Error logging in', error);
+        } catch (err) {
+            if (isAxiosError(err)) {
+                const data: AxiosErrorData = err.response?.data || {};
+                setError(data.detail || 'Invalid username or password');
+            } else {
+                setError('Error logging in');
+            }
+            console.error('Error logging in', err);
         }
     };
 

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import DailyPanel from '../components/Weather/DailyPanel'; // Adjust path if necessary
-import CurrentPanel from '../components/Weather/CurrentPanel'; // Import the CurrentPanel component
-import HourlyPanel from '../components/Weather/HourlyPanel'; // Import the HourlyPanel component
+import DailyPanel from '../components/Weather/DailyPanel';
+import CurrentPanel from '../components/Weather/CurrentPanel';
+import HourlyPanel from '../components/Weather/HourlyPanel';
 import { Container, Alert, Spinner } from 'react-bootstrap';
-import './WeatherPage.css'; // Import your custom CSS
-import '../components/Weather/HourlyPanel.css'; // Import custom CSS for HourlyPanel
-import '../components/Weather/DailyPanel.css'; // Import custom CSS for DailyPanel
-import { Forecast, DailyForecast } from '../types'; // Adjust the path if necessary
+import './WeatherPage.css';
+import '../components/Weather/HourlyPanel.css';
+import '../components/Weather/DailyPanel.css';
+import { Forecast, DailyForecast } from '../types';
 
 interface RouteParams extends Record<string, string | undefined> {
   continent: string;
@@ -77,11 +77,10 @@ const WeatherPage: React.FC = () => {
     const fetchWeatherData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`/api/weather/${continent}/${country}/${region}/${subregion}/${city}/`);
+        const response = await axios.get(`/api/en/weather/${continent}/${country}/${region}/${subregion}/${city}/`);
         const hourlyData: Forecast[] = response.data;
         const currentDate = new Date();
 
-        // Filter out past hours for the current day, but include the current day
         const filteredData = filterAndSortForecasts(hourlyData).filter(forecast => {
           const forecastDateTime = new Date(`${forecast.date}T${String(forecast.hour).padStart(2, '0')}:00:00`);
           return forecastDateTime >= currentDate || forecast.date > currentDate.toISOString().split('T')[0];

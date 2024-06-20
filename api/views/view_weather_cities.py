@@ -7,7 +7,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 
 @api_view(['GET'])
-def weather_for_city(request):
+def weather_for_city(request, lang_code):
     cities = request.query_params.getlist('cities')
     if not cities:
         return Response({'error': 'No cities provided'}, status=400)
@@ -28,7 +28,7 @@ def weather_for_city(request):
 
             serializer = GFSForecastCitiesSerializer(forecasts, many=True)
             weather_data.append({
-                'city': place.name,
+                'city': place.safe_translation_getter('name', lang_code, 'en'),  # Ensure the name is returned in the requested language
                 'forecasts': serializer.data
             })
 

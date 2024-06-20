@@ -6,8 +6,17 @@ interface Place {
     longitude: number;
     slug: string;
     admin_division: {
-        parent: any;
-    };
+        slug: string;
+        parent: {
+            slug: string;
+            parent: {
+                slug: string;
+                parent: {
+                    slug: string;
+                } | null;
+            } | null;
+        } | null;
+    } | null;
     url: string | null;
 }
 
@@ -30,10 +39,15 @@ const LocationFinder: React.FC = () => {
 
     const fetchNearestPlace = async (latitude: number, longitude: number) => {
         setLoading(true);
+        setError(null); // Clear previous errors
         try {
-            const response = await fetch(`/api/nearest-place?lat=${latitude}&lng=${longitude}`);
+            const response = await fetch(`/api/en/nearest-place/?latitude=${latitude}&longitude=${longitude}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch nearest place: ${response.statusText}`);
+            }
             const data: Place = await response.json();
             setNearestPlace(data);
+            localStorage.setItem('locationData', JSON.stringify(data));
         } catch (error) {
             console.error('Error fetching nearest place:', error);
             setError('Failed to fetch nearest place.');
@@ -65,19 +79,26 @@ const LocationFinder: React.FC = () => {
     };
 
     const getWeatherUrl = (place: Place | null) => {
-        if (!place || !place.admin_division || !place.admin_division.parent) {
+        if (!place || !place.admin_division || !place.admin_division.parent || !place.admin_division.parent.parent || !place.admin_division.parent.parent.parent) {
             return '#';
         }
-        // Construct the weather URL based on place details
-        return `/weather/${place.name}`;
+        const citySlug = place.slug;
+        const subregionSlug = place.admin_division.slug;
+        const regionSlug = place.admin_division.parent.slug;
+        const countrySlug = place.admin_division.parent.parent.slug;
+        const continentSlug = place.admin_division.parent.parent.parent.slug;
+
+        return `/weather/${continentSlug}/${countrySlug}/${regionSlug}/${subregionSlug}/${citySlug}/`;
     };
 
     return (
         <div>
             {error && <div className="alert alert-danger">{error}</div>}
-            <button onClick={handleLocation} disabled={loading}>
-                {loading ? 'Loading...' : 'Find My Nearest Place'}
-            </button>
+            {!nearestPlace && (
+                <button onClick={handleLocation} disabled={loading}>
+                    {loading ? 'Loading...' : 'Find My Nearest Place'}
+                </button>
+            )}
             {nearestPlace && (
                 <div className="alert alert-success" role="alert">
                     <strong>Nearest Place:</strong> (Lat: {formatCoordinate(nearestPlace.latitude)}, Long: {formatCoordinate(nearestPlace.longitude)}){' '}

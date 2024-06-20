@@ -4,6 +4,7 @@ from django.contrib.gis.geos import Point
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 from parler.models import TranslatableModel, TranslatedFields
+from unidecode import unidecode
 from .model_geographic_category import GeographicCategory
 from .model_geographic_division import GeographicDivision
 
@@ -11,7 +12,7 @@ class GeographicPlace(TranslatableModel):
     id = models.AutoField(primary_key=True)
     translations = TranslatedFields(
         name=models.CharField(max_length=255, null=True, blank=True),
-        slug=models.SlugField(max_length=255, unique=True, blank=True),
+        slug=models.SlugField(max_length=255, blank=True),
     )
     longitude = models.FloatField()
     latitude = models.FloatField()
@@ -40,15 +41,12 @@ class GeographicPlace(TranslatableModel):
         self.location = Point(self.longitude, self.latitude, srid=4326)
         if not self.elevation:
             self.elevation = 0
-        if not self.safe_translation_getter('name', any_language=True):
-            self.set_current_language('el')
-            self.name = "To Be Defined"
-            similar_names = GeographicPlace.objects.filter(translations__name__startswith(self.name)).count()
-            if similar_names > 0:
-                self.name = f"{self.name} {similar_names + 1}"
-        if not self.safe_translation_getter('slug', any_language=True):
-            self.slug = slugify(self.safe_translation_getter('name', any_language=True))
-            similar_slugs = GeographicPlace.objects.filter(translations__slug__startswith(self.slug)).count()
-            if similar_slugs > 0:
-                self.slug = f"{self.slug}-{similar_slugs + 1}"
+
+        for lang_code, _ in self.get_available_languages():
+            self.set_current_language(lang_code)
+            if not self.safe_translation_getter('name', any_language=True):
+                self.name = "To Be Defined"
+            if not self.safe_translation_getter('slug', any_language=True):
+                self.slug = slugify(unidecode(self.safe_translation_getter('name', any_language=True)))
+
         super().save(*args, **kwargs)
