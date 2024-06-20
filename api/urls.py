@@ -6,7 +6,7 @@ from api.views.view_geographic_place import nearest_place
 from api.views.view_urls_places import all_places_with_urls
 from api.views.view_weather_cities import weather_for_city
 from api.views.view_weather_mountains import weather_for_mountain
-from api.views import ExampleApiView  # Import the new view
+from api.views.example import ExampleApiView  # Correct import
 
 urlpatterns = [
     path('<str:lang_code>/nearest-place/', nearest_place, name='nearest_place'),

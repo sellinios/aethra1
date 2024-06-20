@@ -1,4 +1,4 @@
-# views.py
+# example.py
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
