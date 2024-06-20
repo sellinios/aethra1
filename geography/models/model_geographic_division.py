@@ -1,0 +1,21 @@
+# geography/models/model_geographic_division.py
+from django.db import models
+from django.utils.text import slugify
+
+class GeographicDivision(models.Model):
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True, blank=True)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='children')
+    level_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ('name', 'parent', 'level_name')
+        verbose_name_plural = "Geographic Divisions"

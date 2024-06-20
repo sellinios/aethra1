@@ -1,0 +1,19 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[packages]
+Django = "==5.0.6"
+djangorestframework = "*"
+django-environ = "==0.11.2"
+gunicorn = "==22.0.0"
+psycopg2-binary = "==2.9.9"
+django-cors-headers = "*"
+
+[dev-packages]
+flake8 = "*"
+black = "*"
+
+[requires]
+python_version = "3.12"

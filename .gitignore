@@ -1,0 +1,57 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Node modules
+node_modules/
+frontend/*/node_modules/
+
+# Build directories
+frontend/*/build/
+
+# Static files
+static/
+
+# Migrations
+*/migrations/
+
+# OSX files
+.DS_Store
+
+# Environment variables
+.env.production
+.env.development
+
+# Data files (GRIB2)
+data/**/*.grib2
+data/**/*.tmp
+
+# Parameters
+parameters/
+parameters/**/*.grib2
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.swp
+*.swo
+
+# IDE configurations
+.idea/
+.vscode/

@@ -1,0 +1,63 @@
+// src/App.tsx
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import CookieConsent from 'react-cookie-consent';
+import Footer from './components/Footer';
+import UpperHeader from './components/UpperHeader';
+import Header from './components/Header';
+import WeatherPage from './pages/WeatherPage';
+import HomePage from './pages/HomePage';
+import Search from './components/Search';
+import SearchResultsPage from './pages/SearchResultPage';
+import Register from './components/Register';
+import Login from './components/Login';
+
+const App: React.FC = () => {
+    const [isConsentGiven, setIsConsentGiven] = useState(localStorage.getItem('cookieConsent') === 'true');
+
+    const handleAccept = () => {
+        localStorage.setItem('cookieConsent', 'true');
+        setIsConsentGiven(true);
+    };
+
+    useEffect(() => {
+        if (isConsentGiven) {
+            const script = document.createElement('script');
+            script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3131616609445146';
+            script.async = true;
+            script.crossOrigin = 'anonymous';
+            document.body.appendChild(script);
+        }
+    }, [isConsentGiven]);
+
+    return (
+        <Router>
+            <div>
+                <UpperHeader />
+                <Header />
+                <Search />
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/weather/:continent/:country/:region/:subregion/:city" element={<WeatherPage />} />
+                    <Route path="/search" element={<SearchResultsPage />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/login" element={<Login />} />
+                </Routes>
+                <Footer />
+                <CookieConsent
+                    location="bottom"
+                    buttonText="I understand"
+                    cookieName="myAwesomeCookieName2"
+                    style={{ background: "#2B373B" }}
+                    buttonStyle={{ color: "#4e503b", fontSize: "13px" }}
+                    expires={150}
+                    onAccept={handleAccept}
+                >
+                    This website uses cookies to enhance the user experience.
+                </CookieConsent>
+            </div>
+        </Router>
+    );
+};
+
+export default App;
