@@ -27,7 +27,8 @@ const SearchResultsPage: React.FC = () => {
 
     useEffect(() => {
         if (query) {
-            fetch(`/api/places-with-urls/?search=${query}`)
+            const langCode = 'en'; // Change this dynamically based on user preference or context
+            fetch(`/api/${langCode}/places-with-urls/?search=${query}`)
                 .then(response => response.json())
                 .then(data => {
                     if (Array.isArray(data)) {

@@ -1,23 +1,14 @@
+// src/components/HourlyPanel.tsx
 import React from 'react';
 import { WiDaySunny } from 'react-icons/wi';
 import './HourlyPanel.css'; // Import your custom CSS
 import { Forecast } from '../../types';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import { roundToNearestWhole, getWindDirection } from '../../utils/weatherUtils';
 
 interface HourlyPanelProps {
   forecasts: Forecast[];
 }
-
-const roundToNearestWhole = (num: number): number => {
-  return Math.round(num);
-};
-
-const getWindDirection = (angle: number | null): string => {
-  if (angle === null) return 'N/A';
-  const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-  const index = Math.floor((angle / 22.5) + 0.5) % 16;
-  return directions[index];
-};
 
 const HourlyPanel: React.FC<HourlyPanelProps> = ({ forecasts }) => {
   const currentDateTime = new Date();

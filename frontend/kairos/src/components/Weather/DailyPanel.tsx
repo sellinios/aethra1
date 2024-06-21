@@ -1,3 +1,4 @@
+// src/components/Weather/DailyPanel.tsx
 import React, { useState } from 'react';
 import WeatherIcon from './WeatherIcon';
 import HourlyPanel from './HourlyPanel';
@@ -6,57 +7,13 @@ import { FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
 import './HourlyPanel.css';
 import './DailyPanel.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { roundToNearestWhole, getCardinalDirection, calculateTotalPrecipitation, getWeatherIconState, formatDate } from '../../utils/weatherUtils';
 
 interface DailyPanelProps {
   forecasts: DailyForecast[];
   country: string;
   showHeaders: boolean;
 }
-
-const roundToNearestWhole = (num: number): number => {
-  return Math.round(num);
-};
-
-const getCardinalDirection = (angle: number | null): string => {
-  if (angle === null) return 'N/A';
-  const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-  const index = Math.floor((angle / 22.5) + 0.5) % 16;
-  return directions[index];
-};
-
-const calculateTotalPrecipitation = (daily: DailyForecast): number =>
-  daily.hourlyForecasts.reduce((total: number, { forecast_data }) => total + (forecast_data.precipitation_rate_level_0_surface || 0), 0);
-
-const getWeatherIconState = (description: string, cloudCover: number | null, precipitation: number | null): WeatherState => {
-  if (precipitation && precipitation > 0 || /rain|storm/.test(description.toLowerCase())) {
-    return 'rainy';
-  }
-  if (/snow/.test(description.toLowerCase())) {
-    return 'snowy';
-  }
-  if (/fog/.test(description.toLowerCase())) {
-    return 'fog';
-  }
-  if (/hail/.test(description.toLowerCase())) {
-    return 'hail';
-  }
-  if (/thunder/.test(description.toLowerCase())) {
-    return 'lightning';
-  }
-  if (cloudCover !== null && cloudCover < 25) {
-    return /night/.test(description.toLowerCase()) ? 'clear-night' : 'sunny';
-  }
-  if (cloudCover !== null && cloudCover < 50) {
-    return 'partlycloudy';
-  }
-  return 'cloudy';
-};
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric' };
-  return new Intl.DateTimeFormat('en-GB', options).format(date);
-};
 
 const DailyPanel: React.FC<DailyPanelProps> = ({ forecasts, country, showHeaders }) => {
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
@@ -117,7 +74,8 @@ const DailyPanel: React.FC<DailyPanelProps> = ({ forecasts, country, showHeaders
     const generalIconState = getWeatherIconState(
       generalText,
       hourlyForecasts[0]?.forecast_data.high_cloud_cover_level_0_highCloudLayer || 0,
-      hourlyForecasts[0]?.forecast_data.precipitation_rate_level_0_surface || 0
+      hourlyForecasts[0]?.forecast_data.precipitation_rate_level_0_surface || 0,
+      hourlyForecasts[0]?.forecast_data.convective_precitation_rate_level_0_surface || 0 // Corrected here
     );
 
     const alertMessage = getAlertMessage(maxTemp, date);

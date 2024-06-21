@@ -1,33 +1,69 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from geography.models import GeographicPlace
+from geography.models import GeographicPlace, GeographicDivision
 from weather.models import GFSForecast
 from api.serializers.serializer_weather import GFSForecastSerializer
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
+import traceback
 
 @api_view(['GET'])
-def weather_for_place(request, continent, country, region, subregion, city):
+def weather_for_place(request, lang_code, continent, country, region, subregion, city):
     try:
-        place = GeographicPlace.objects.get(
-            admin_division__parent__parent__parent__slug=continent,
-            admin_division__parent__parent__slug=country,
-            admin_division__parent__slug=region,
-            admin_division__slug=subregion,
-            slug=city
-        )
+        # Fetch the parent division
+        admin_division = GeographicDivision.objects.get(slug=subregion)
+        print(f"Admin Division: {admin_division.name}")
 
+        # Fetch all places matching the city name under the given admin division
+        places = GeographicPlace.objects.language(lang_code).filter(admin_division=admin_division,
+                                                                    translations__slug=city)
+
+        if not places.exists():
+            return Response({'error': 'GeographicPlace does not exist.'}, status=404)
+
+        # Deduplicate by name and coordinates
+        unique_places = {}
+        for place in places:
+            key = (place.latitude, place.longitude)
+            if key not in unique_places:
+                unique_places[key] = place
+
+        place = list(unique_places.values())[0]
+        print(f"Selected Place: {place.safe_translation_getter('name', lang_code, 'en')} ({place.latitude}, {place.longitude})")
+
+        # Calculate the Point location
         user_location = Point(place.longitude, place.latitude, srid=4326)
-        weather_data = GFSForecast.objects.annotate(distance=Distance('location', user_location)).filter(distance__lte=100000)
 
-        if not weather_data.exists():
-            return Response([])
+        # Fetch forecasts near the place
+        forecasts = GFSForecast.objects.annotate(distance=Distance('location', user_location)).order_by(
+            'distance').filter(distance__lte=100000)  # 100 km radius
 
-        sorted_weather_data = weather_data.order_by('date', 'hour')
-        serializer = GFSForecastSerializer(sorted_weather_data, many=True)
-        return Response(serializer.data)
+        if not forecasts.exists():
+            return Response({'error': 'No weather data available for this location.'}, status=404)
 
-    except GeographicPlace.DoesNotExist:
-        return Response({'error': 'Place not found'}, status=404)
+        # Adjust the temperature for elevation
+        adjusted_forecasts = []
+        for forecast in forecasts:
+            forecast_data = forecast.forecast_data.copy()
+            temperature_kelvin = forecast_data.get("temperature_level_2_heightAboveGround")
+            if temperature_kelvin is not None:
+                temperature_celsius = temperature_kelvin - 273.15
+                # Adjust temperature for elevation
+                elevation_adjustment = place.elevation * 0.006
+                adjusted_temperature_celsius = temperature_celsius - elevation_adjustment
+                forecast_data["temperature_level_2_heightAboveGround"] = adjusted_temperature_celsius + 273.15  # Convert back to Kelvin
+            forecast.forecast_data = forecast_data
+            adjusted_forecasts.append(forecast)
+
+        serializer = GFSForecastSerializer(adjusted_forecasts, many=True)
+
+        return Response({
+            'place': place.safe_translation_getter('name', lang_code, 'en'),
+            'forecasts': serializer.data
+        })
+
+    except GeographicDivision.DoesNotExist:
+        return Response({'error': 'GeographicDivision does not exist.'}, status=404)
     except Exception as e:
+        print(traceback.format_exc())
         return Response({'error': str(e)}, status=500)

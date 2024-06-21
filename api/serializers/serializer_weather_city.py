@@ -2,7 +2,7 @@ from rest_framework import serializers
 from weather.models import GFSForecast
 import math
 
-class GFSForecastCitiesSerializer(serializers.ModelSerializer):
+class GFSForecastCitySerializer(serializers.ModelSerializer):
     temperature_celsius = serializers.SerializerMethodField()
     wind_speed = serializers.SerializerMethodField()
     wind_direction = serializers.SerializerMethodField()

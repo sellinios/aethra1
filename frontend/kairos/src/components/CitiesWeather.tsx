@@ -48,11 +48,12 @@ const CitiesWeather: React.FC = () => {
   }, [weatherData]);
 
   useEffect(() => {
+    const langCode = 'en'; // Change this dynamically based on the user's language preference
     const cities = ['athens', 'thessaloniki', 'patra']; // Update city slugs here
     const fetchWeatherData = async () => {
       try {
         const cityWeatherPromises = cities.map(async (city) => {
-          const response = await axios.get(`/api/weather/cities/?cities=${city}`);
+          const response = await axios.get(`/api/${langCode}/weather/cities/?cities=${city}`);
           const hourlyData = response.data[0]?.forecasts || [];
 
           // Filter and sort the forecasts

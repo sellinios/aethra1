@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import axiosInstance from '../utils/axiosInstance';
+import { isAxiosError, getAxiosErrorMessage } from '../utils/axiosError';
 import DailyPanel from '../components/Weather/DailyPanel';
 import CurrentPanel from '../components/Weather/CurrentPanel';
-import HourlyPanel from '../components/Weather/HourlyPanel';
 import { Container, Alert, Spinner } from 'react-bootstrap';
 import './WeatherPage.css';
 import '../components/Weather/HourlyPanel.css';
 import '../components/Weather/DailyPanel.css';
 import { Forecast, DailyForecast } from '../types';
+import { filterAndSortForecasts, aggregateDailyData } from '../utils/weatherUtils';
 
 interface RouteParams extends Record<string, string | undefined> {
   continent: string;
@@ -17,49 +18,6 @@ interface RouteParams extends Record<string, string | undefined> {
   subregion: string;
   city: string;
 }
-
-const aggregateDailyData = (hourlyData: Forecast[]): DailyForecast[] => {
-  const dailyDataMap: Record<string, DailyForecast> = {};
-
-  hourlyData.forEach((data) => {
-    const date = data.date;
-    if (!dailyDataMap[date]) {
-      dailyDataMap[date] = {
-        date,
-        generalText: 'General Text', // Replace this with actual generalText if available
-        maxTemp: data.temperature_celsius,
-        minTemp: data.temperature_celsius,
-        hourlyForecasts: [],
-      };
-    }
-
-    dailyDataMap[date].maxTemp = Math.max(dailyDataMap[date].maxTemp, data.temperature_celsius);
-    dailyDataMap[date].minTemp = Math.min(dailyDataMap[date].minTemp, data.temperature_celsius);
-    dailyDataMap[date].hourlyForecasts.push(data);
-  });
-
-  return Object.values(dailyDataMap);
-};
-
-const filterAndSortForecasts = (hourlyData: Forecast[]): Forecast[] => {
-  const latestCycleMap: Record<string, Forecast> = {};
-
-  hourlyData.forEach((forecast) => {
-    const key = `${forecast.date}-${forecast.hour}`;
-    if (!latestCycleMap[key] || new Date(forecast.timestamp) > new Date(latestCycleMap[key].timestamp)) {
-      latestCycleMap[key] = forecast;
-    }
-  });
-
-  const filteredData = Object.values(latestCycleMap);
-
-  return filteredData.sort((a, b) => {
-    if (a.date === b.date) {
-      return a.hour - b.hour;
-    }
-    return new Date(a.date).getTime() - new Date(b.date).getTime();
-  });
-};
 
 const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -77,8 +35,8 @@ const WeatherPage: React.FC = () => {
     const fetchWeatherData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`/api/en/weather/${continent}/${country}/${region}/${subregion}/${city}/`);
-        const hourlyData: Forecast[] = response.data;
+        const response = await axiosInstance.get(`/en/weather/${continent}/${country}/${region}/${subregion}/${city}/`);
+        const hourlyData: Forecast[] = response.data.forecasts;
         const currentDate = new Date();
 
         const filteredData = filterAndSortForecasts(hourlyData).filter(forecast => {
@@ -86,18 +44,17 @@ const WeatherPage: React.FC = () => {
           return forecastDateTime >= currentDate || forecast.date > currentDate.toISOString().split('T')[0];
         });
 
-        console.log('Filtered Data:', filteredData); // Debug log to see filtered data
-
         const aggregatedData = aggregateDailyData(filteredData);
         setHourlyWeatherData(filteredData);
         setDailyWeatherData(aggregatedData);
         setCurrentWeatherData(filteredData[0]);
         setError(null);
-      } catch (err: any) {
-        if (err.response && err.response.status === 404) {
-          setError('No weather data available for this location.');
+      } catch (err: unknown) {
+        console.error('Error fetching weather data:', err);
+        if (isAxiosError(err)) {
+          setError(getAxiosErrorMessage(err));
         } else {
-          setError('Error fetching weather data: ' + (err.response?.status || 'Unknown error'));
+          setError('Unknown error');
         }
       } finally {
         setLoading(false);
