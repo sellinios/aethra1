@@ -2,15 +2,14 @@ import React from 'react';
 import { Card } from 'react-bootstrap';
 import { Forecast } from '../../types';
 import './CurrentPanel.css';
-import HourlyPanel from './HourlyPanel'; // Import the HourlyPanel component
-import { roundToNearestWhole, getWindDirection } from '../../utils/weatherUtils'; // Import utility functions
+import WeatherIcon from './WeatherIcon';
+import { roundToNearestWhole, getWindDirection } from '../../utils/weatherUtils';
 
 interface CurrentPanelProps {
   forecast: Forecast;
-  nextForecasts: Forecast[]; // Update prop to accept multiple forecasts
+  nextForecasts: Forecast[];
 }
 
-// Function to convert wind speed in km/h to Beaufort scale
 const windSpeedToBeaufort = (speed: number) => {
   if (speed < 1) return 0;
   else if (speed <= 5) return 1;
@@ -27,7 +26,6 @@ const windSpeedToBeaufort = (speed: number) => {
   else return 12;
 };
 
-// Function to validate and format the UTC cycle time
 const validateAndFormatCycleTime = (utcCycleTime: string): string => {
   const validCycleTimes = ['00', '06', '12', '18'];
   return validCycleTimes.includes(utcCycleTime) ? utcCycleTime : '00';
@@ -38,18 +36,27 @@ const CurrentPanel: React.FC<CurrentPanelProps> = ({ forecast, nextForecasts }) 
   const beaufortScale = windSpeedToBeaufort(roundedWindSpeed);
   const validatedUtcCycleTime = validateAndFormatCycleTime(forecast.utc_cycle_time);
 
-  // Extract date part from imported_at and combine with validatedUtcCycleTime
   const importedDate = new Date(forecast.imported_at);
   const modelCycleDate = `${importedDate.getUTCFullYear()}-${String(importedDate.getUTCMonth() + 1).padStart(2, '0')}-${String(importedDate.getUTCDate()).padStart(2, '0')} ${validatedUtcCycleTime}:00 UTC`;
 
   return (
     <Card className="mb-3 current-panel">
       <Card.Header className="current-panel-header">Current Weather</Card.Header>
-      <Card.Body>
+      <Card.Body className="vertical-layout">
+        <WeatherIcon state={forecast.state} width={100} height={100} className="weather-icon" />
         <Card.Title className="current-panel-title">{Math.round(forecast.temperature_celsius)}°C</Card.Title>
         <Card.Text>Wind: {roundedWindSpeed} km/h (Beaufort: {beaufortScale})</Card.Text>
         <Card.Text>Model Cycle: {modelCycleDate}</Card.Text>
-        <HourlyPanel forecasts={nextForecasts} />
+      </Card.Body>
+      <Card.Body className="horizontal-layout">
+        {nextForecasts.map((forecast) => (
+          <div key={forecast.id} className="hourly-forecast">
+            <div>{String(forecast.hour).padStart(2, '0')}:00</div>
+            <WeatherIcon state={forecast.state} width={30} height={30} />
+            <div>{Math.round(forecast.temperature_celsius)}°C</div>
+            <div>{forecast.wind_speed ? `${getWindDirection(forecast.wind_direction)} ${Math.round(forecast.wind_speed)} m/s` : 'N/A'}</div>
+          </div>
+        ))}
       </Card.Body>
     </Card>
   );

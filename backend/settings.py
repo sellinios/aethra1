@@ -11,7 +11,7 @@ env.read_env()
 environment = os.getenv('DJANGO_ENV', 'development')
 env_file = BASE_DIR / f'.env.{environment}'
 
-if os.path.exists(env_file):
+if env_file.exists():
     env.read_env(env_file)
 else:
     raise ImproperlyConfigured(f"Environment file {env_file} does not exist")

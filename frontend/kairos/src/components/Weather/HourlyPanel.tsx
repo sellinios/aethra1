@@ -1,4 +1,3 @@
-// src/components/HourlyPanel.tsx
 import React from 'react';
 import { WiDaySunny } from 'react-icons/wi';
 import './HourlyPanel.css'; // Import your custom CSS

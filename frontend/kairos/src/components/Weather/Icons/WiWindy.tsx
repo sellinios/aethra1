@@ -1,14 +1,15 @@
+// src/components/Weather/Icons/WiWindy.tsx
 import React from 'react';
-import './WindyIcon.css';
+import './WiWindy.css';
 
-interface WindyIconProps {
+interface WiWindyProps {
   width?: number;
   height?: number;
   color?: string;
   className?: string;
 }
 
-const WindyIcon: React.FC<WindyIconProps> = ({ width = 100, height = 100, color = 'lightblue', className }) => {
+const WiWindy: React.FC<WiWindyProps> = ({ width = 100, height = 100, color = 'lightblue', className }) => {
   return (
     <svg
       className={`rotate ${className}`}
@@ -18,11 +19,9 @@ const WindyIcon: React.FC<WindyIconProps> = ({ width = 100, height = 100, color 
       fill={color}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Add SVG elements to represent wind */}
       <circle cx="32" cy="32" r="14" />
-      {/* Other elements */}
     </svg>
   );
 };
 
-export default WindyIcon;
+export default WiWindy;

@@ -4,10 +4,11 @@ import logging
 import numpy as np
 from datetime import datetime, timezone, timedelta
 from django.core.management.base import BaseCommand
-from django.contrib.gis.geos import Point as GEOSPoint
+from django.contrib.gis.geos import GEOSGeometry
 from weather.models import GFSParameter, GFSForecast
-from geography.models import GeographicPlace
 from concurrent.futures import ThreadPoolExecutor
+import json
+from django.db import connection  # Import connection
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -46,26 +47,42 @@ def extract_forecast_details_from_filename(filename):
         else:
             raise ValueError(f"Invalid file format: {base_name}")
 
-        return valid_datetime, forecast_hour, forecast_datetime
     except ValueError as e:
         logger.error(f"Error extracting details from filename {filename}: {e}")
         return None, None, None
 
 def bulk_import_forecast_data(forecast_data_dict):
     try:
-        forecast_data = [
-            GFSForecast(
-                latitude=data['latitude'],
-                longitude=data['longitude'],
-                date=data['date'],
-                hour=data['hour'],
-                utc_cycle_time=data['utc_cycle_time'],
-                forecast_data=data['forecast_data'],
-                location=GEOSPoint(data['longitude'], data['latitude'])
-            ) for data in forecast_data_dict.values()
-        ]
-        GFSForecast.objects.bulk_create(forecast_data, batch_size=1000)
-        logger.info("Bulk inserted %d records", len(forecast_data))
+        from psycopg2.extras import execute_values
+        from django.utils import timezone
+
+        forecast_data = []
+        current_time = timezone.now()
+        for data in forecast_data_dict.values():
+            try:
+                forecast_data.append((
+                    data['latitude'],
+                    data['longitude'],
+                    data['date'],
+                    data['hour'],
+                    data['utc_cycle_time'],
+                    GEOSGeometry(f'SRID=4326;POINT({data["longitude"]} {data["latitude"]})').wkt,
+                    json.dumps(data['forecast_data']),
+                    current_time  # Set the imported_at field to the current time
+                ))
+            except Exception as e:
+                logger.error(f"Error preparing forecast object: {e}, data: {data}")
+
+        if forecast_data:
+            logger.info(f"Attempting to bulk insert {len(forecast_data)} records.")
+            with connection.cursor() as cursor:
+                insert_query = """
+                    INSERT INTO weather_gfsforecast
+                    (latitude, longitude, date, hour, utc_cycle_time, location, forecast_data, imported_at)
+                    VALUES %s
+                """
+                execute_values(cursor, insert_query, forecast_data)
+            logger.info("Bulk inserted %d records", len(forecast_data))
     except Exception as e:
         logger.error(f"Error during bulk insert: {e}")
 
@@ -73,9 +90,31 @@ def round_to_nearest_0_25(value):
     return round(value * 4) / 4
 
 def get_relevant_places():
-    places = GeographicPlace.objects.all()
-    relevant_places = {(round_to_nearest_0_25(place.location.y), round_to_nearest_0_25(place.location.x)) for place in places}
-    return relevant_places
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT ST_AsText(location) 
+                FROM geography_geographicplace 
+                WHERE location IS NOT NULL
+            """)
+            rows = cursor.fetchall()
+
+        logger.info(f"Fetched {len(rows)} places from the database.")
+
+        relevant_places = set()
+        for row in rows:
+            location_wkt = row[0]
+            if location_wkt.startswith('POINT(') and location_wkt.endswith(')'):
+                lon, lat = map(float, location_wkt[6:-1].split())
+                rounded_lat = round_to_nearest_0_25(lat)
+                rounded_lon = round_to_nearest_0_25(lon)
+                relevant_places.add((rounded_lat, rounded_lon))
+
+        logger.info(f"Processed relevant places: {len(relevant_places)}")
+        return relevant_places
+    except Exception as e:
+        logger.error(f"Error fetching relevant places: {e}")
+        return set()
 
 def process_grib_message(grib, valid_datetime, forecast_datetime, relevant_places, forecast_data_dict):
     data = grib.values
@@ -145,20 +184,14 @@ def parse_and_import_gfs_data(file_path):
             total_messages = gribs.messages
             logger.info("Total number of messages in the GRIB file: %d", total_messages)
 
-            with ThreadPoolExecutor() as executor:
-                futures = []
-                for i, grib in enumerate(gribs, start=1):
-                    logger.info(
-                        "Processing message %d of %d. Parameter: %s, Level: %d, Type of Level: %s",
-                        i, total_messages, grib.parameterName, grib.level, grib.typeOfLevel
-                    )
-                    logger.info("Valid datetime is %s (UTC)", valid_datetime.isoformat())
+            for i, grib in enumerate(gribs, start=1):
+                logger.info(
+                    "Processing message %d of %d. Parameter: %s, Level: %d, Type of Level: %s",
+                    i, total_messages, grib.parameterName, grib.level, grib.typeOfLevel
+                )
+                logger.info("Valid datetime is %s (UTC)", valid_datetime.isoformat())
 
-                    futures.append(
-                        executor.submit(process_grib_message, grib, valid_datetime, forecast_datetime, relevant_places, forecast_data_dict))
-
-                for future in futures:
-                    future.result()
+                process_grib_message(grib, valid_datetime, forecast_datetime, relevant_places, forecast_data_dict)
 
     except Exception as e:
         logger.error("Error processing GRIB file %s: %s", file_path, e)
@@ -181,7 +214,11 @@ class Command(BaseCommand):
         data_folder = '/home/sellinios/aethra/data'
 
         # Fetch enabled parameters from the database
-        enabled_parameters = GFSParameter.objects.filter(enabled=True)
+        try:
+            enabled_parameters = GFSParameter.objects.filter(enabled=True)
+        except Exception as e:
+            logger.error(f"Error fetching enabled parameters: {e}")
+            return
 
         if not enabled_parameters.exists():
             logger.warning("No enabled parameters found in the database.")
@@ -230,5 +267,4 @@ class Command(BaseCommand):
                 logger.error("Error processing file %s: %s", file_path, e)
 
         logger.info("GFS data import process completed for all files.")
-
         logger.info("All files processed.")

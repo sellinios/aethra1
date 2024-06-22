@@ -1,3 +1,5 @@
+// src/types.ts
+
 export type WeatherState =
   | 'sunny'
   | 'clear-night'
@@ -41,8 +43,9 @@ export interface Forecast {
   date: string;
   hour: number;
   timestamp: string;
-  utc_cycle_time: string; // Add this line if it's missing
-  imported_at: string; // Ensure this field is included
+  utc_cycle_time: string;
+  imported_at: string;
+  state: WeatherState; // Add this line to include the state property
 }
 
 export interface DailyForecast {

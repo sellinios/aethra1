@@ -1,39 +1,76 @@
+// src/components/Weather/WeatherIcon.tsx
 import React from 'react';
-import { WiDaySunny, WiCloud, WiRain, WiSnow, WiFog, WiLightning, WiNightClear, WiDayCloudy } from 'react-icons/wi';
-import { WeatherState } from '../../types';
+import {
+  RseClearDay,
+  RseClearNight,
+  RseCloudy,
+  RseFog,
+  RseHail,
+  RsePartlyCloudyDay,
+  RsePartlyCloudyNight,
+  RseRain,
+  RseRainSnow,
+  RseRainSnowShowersDay,
+  RseRainSnowShowersNight,
+  RseShowersDay,
+  RseShowersNight,
+  RseSleet,
+  RseSnow,
+  RseSnowShowersDay,
+  RseSnowShowersNight,
+  RseThunder,
+  RseThunderRain,
+  RseThunderShowersDay,
+  RseThunderShowersNight,
+  RseWind,
+} from 'react-skycons-extended';
 
 interface WeatherIconProps {
-  state: WeatherState;
+  state: string;
   width: number;
   height: number;
-  className?: string; // Add this line
+  color?: string;
+  className?: string;
 }
 
-const WeatherIcon: React.FC<WeatherIconProps> = ({ state, width, height, className }) => {
-  const getIcon = (state: WeatherState) => {
+const WeatherIcon: React.FC<WeatherIconProps> = ({ state, width, height, color = 'black', className }) => {
+  const getIconComponent = (state: string): React.FC<any> => {
     switch (state) {
       case 'sunny':
-        return <WiDaySunny size={width} className={className} />;
+        return RseClearDay;
       case 'cloudy':
-        return <WiCloud size={width} className={className} />;
+        return RseCloudy;
       case 'rainy':
-        return <WiRain size={width} className={className} />;
+        return RseRain;
       case 'snowy':
-        return <WiSnow size={width} className={className} />;
+        return RseSnow;
       case 'fog':
-        return <WiFog size={width} className={className} />;
+        return RseFog;
       case 'lightning':
-        return <WiLightning size={width} className={className} />;
+        return RseThunder;
       case 'clear-night':
-        return <WiNightClear size={width} className={className} />;
+        return RseClearNight;
       case 'partlycloudy':
-        return <WiDayCloudy size={width} className={className} />;
+        return RsePartlyCloudyDay;
+      case 'windy':
+        return RseWind;
       default:
-        return <WiCloud size={width} className={className} />;
+        return RseCloudy;
     }
   };
 
-  return <>{getIcon(state)}</>;
+  const IconComponent = getIconComponent(state);
+
+  return (
+    <div className={`weather-icon ${className}`}>
+      <IconComponent
+        color={color}
+        width={width}
+        height={height}
+        autoplay={true}
+      />
+    </div>
+  );
 };
 
 export default WeatherIcon;
