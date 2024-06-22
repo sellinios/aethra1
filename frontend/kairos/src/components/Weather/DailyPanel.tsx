@@ -1,4 +1,3 @@
-// src/components/Weather/DailyPanel.tsx
 import React, { useState } from 'react';
 import WeatherIcon from './WeatherIcon';
 import HourlyPanel from './HourlyPanel';
@@ -7,7 +6,7 @@ import { FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
 import './HourlyPanel.css';
 import './DailyPanel.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { roundToNearestWhole, getCardinalDirection, calculateTotalPrecipitation, getWeatherIconState, formatDate } from '../../utils/weatherUtils';
+import { roundToNearestWhole, getWindDirection, calculateTotalPrecipitation, getWeatherIconState, formatDate } from '../../utils/weatherUtils';
 
 interface DailyPanelProps {
   forecasts: DailyForecast[];
@@ -75,7 +74,7 @@ const DailyPanel: React.FC<DailyPanelProps> = ({ forecasts, country, showHeaders
       generalText,
       hourlyForecasts[0]?.forecast_data.high_cloud_cover_level_0_highCloudLayer || 0,
       hourlyForecasts[0]?.forecast_data.precipitation_rate_level_0_surface || 0,
-      hourlyForecasts[0]?.forecast_data.convective_precitation_rate_level_0_surface || 0 // Corrected here
+      hourlyForecasts[0]?.forecast_data.convective_precitation_rate_level_0_surface || 0 // Corrected typo
     );
 
     const alertMessage = getAlertMessage(maxTemp, date);
@@ -95,7 +94,7 @@ const DailyPanel: React.FC<DailyPanelProps> = ({ forecasts, country, showHeaders
               {hourlyForecasts[0] && hourlyForecasts[0].wind_direction !== null && hourlyForecasts[0].wind_speed !== null && (
                 <>
                   <span style={{ transform: `rotate(${hourlyForecasts[0].wind_direction}deg)` }}>↑</span>
-                  {getCardinalDirection(hourlyForecasts[0].wind_direction)} {hourlyForecasts[0].wind_speed.toFixed(1)} m/s
+                  {getWindDirection(hourlyForecasts[0].wind_direction)} {hourlyForecasts[0].wind_speed.toFixed(1)} m/s
                 </>
               )}
             </div>

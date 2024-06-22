@@ -1,3 +1,5 @@
+// src/utils/weatherUtils.ts
+
 import { Forecast, DailyForecast, WeatherState } from '../types';
 
 export const filterAndSortForecasts = (hourlyData: Forecast[]): Forecast[] => {
@@ -43,15 +45,16 @@ export const aggregateDailyData = (hourlyData: Forecast[]): DailyForecast[] => {
   return Object.values(dailyDataMap);
 };
 
-export const roundToNearestWhole = (num: number): number => {
-  return Math.round(num);
-};
-
-export const getWindDirection = (angle: number | null): string => {
-  if (angle === null) return 'N/A';
-  const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-  const index = Math.floor((angle / 22.5) + 0.5) % 16;
-  return directions[index];
+export const getVisibleDays = (width: number, dates: string[]) => {
+  if (width >= 1200) {
+    return dates.slice(0, 7); // Show 7 days on large screens
+  } else if (width >= 992) {
+    return dates.slice(0, 5); // Show 5 days on medium screens
+  } else if (width >= 768) {
+    return dates.slice(0, 3); // Show 3 days on small screens
+  } else {
+    return dates.slice(0, 2); // Show 2 days on extra small screens
+  }
 };
 
 export const getWeatherIconState = (description: string, cloudCover: number | null, precipitation: number | null, convectivePrecipitation: number | null): WeatherState => {
@@ -82,18 +85,22 @@ export const getWeatherIconState = (description: string, cloudCover: number | nu
   return 'cloudy';
 };
 
+export const getWindDirection = (angle: number | null): string => {
+  if (angle === null) return 'N/A';
+  const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+  const index = Math.floor((angle / 22.5) + 0.5) % 16;
+  return directions[index];
+};
+
+export const calculateTotalPrecipitation = (daily: DailyForecast): number =>
+  daily.hourlyForecasts.reduce((total: number, { forecast_data }) => total + (forecast_data.precipitation_rate_level_0_surface || 0), 0);
+
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric' };
   return new Intl.DateTimeFormat('en-GB', options).format(date);
 };
 
-export const calculateTotalPrecipitation = (daily: DailyForecast): number =>
-  daily.hourlyForecasts.reduce((total: number, { forecast_data }) => total + (forecast_data.precipitation_rate_level_0_surface || 0), 0);
-
-export const getCardinalDirection = (angle: number | null): string => {
-  if (angle === null) return 'N/A';
-  const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-  const index = Math.floor((angle / 22.5) + 0.5) % 16;
-  return directions[index];
+export const roundToNearestWhole = (num: number): number => {
+  return Math.round(num);
 };

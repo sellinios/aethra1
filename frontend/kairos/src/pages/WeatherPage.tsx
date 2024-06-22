@@ -1,3 +1,5 @@
+// src/pages/WeatherPage.tsx
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
@@ -28,6 +30,7 @@ const WeatherPage: React.FC = () => {
   const [hourlyWeatherData, setHourlyWeatherData] = useState<Forecast[]>([]);
   const [dailyWeatherData, setDailyWeatherData] = useState<DailyForecast[]>([]);
   const [currentWeatherData, setCurrentWeatherData] = useState<Forecast | null>(null);
+  const [nextWeatherData, setNextWeatherData] = useState<Forecast[]>([]); // Add state for next forecasts
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -48,6 +51,7 @@ const WeatherPage: React.FC = () => {
         setHourlyWeatherData(filteredData);
         setDailyWeatherData(aggregatedData);
         setCurrentWeatherData(filteredData[0]);
+        setNextWeatherData(filteredData.slice(1, 4)); // Set the next few hours of forecasts
         setError(null);
       } catch (err: unknown) {
         console.error('Error fetching weather data:', err);
@@ -75,10 +79,12 @@ const WeatherPage: React.FC = () => {
         </div>
       )}
       {error && <Alert variant="danger">{error}</Alert>}
-      {currentWeatherData && <CurrentPanel forecast={currentWeatherData} />}
+      {currentWeatherData && <CurrentPanel forecast={currentWeatherData} nextForecasts={nextWeatherData} />}
       {dailyWeatherData.length > 0 && <DailyPanel forecasts={dailyWeatherData} country={city || 'Unknown'} showHeaders={false} />}
     </Container>
   );
 };
 
 export default WeatherPage;
+
+export {};

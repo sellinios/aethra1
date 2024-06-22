@@ -4,28 +4,12 @@ import { Table, Spinner, Alert } from 'react-bootstrap';
 import CitiesWeatherRow from './CitiesWeatherRow';
 import { DailyForecast } from '../types';
 import './CitiesWeather.css';
-import { filterAndSortForecasts, aggregateDailyData } from '../utils/weatherUtils';
+import { filterAndSortForecasts, aggregateDailyData, getVisibleDays } from '../utils/weatherUtils';
 
 interface CityWeather {
   city: string;
   forecasts: DailyForecast[];
 }
-
-const roundToNearestWhole = (num: number): number => {
-  return Math.round(num);
-};
-
-const getVisibleDays = (width: number, dates: string[]) => {
-  if (width >= 1200) {
-    return dates.slice(0, 7); // Show 7 days on large screens
-  } else if (width >= 992) {
-    return dates.slice(0, 5); // Show 5 days on medium screens
-  } else if (width >= 768) {
-    return dates.slice(0, 3); // Show 3 days on small screens
-  } else {
-    return dates.slice(0, 2); // Show 2 days on extra small screens
-  }
-};
 
 const CitiesWeather: React.FC = () => {
   const [weatherData, setWeatherData] = useState<CityWeather[]>([]);

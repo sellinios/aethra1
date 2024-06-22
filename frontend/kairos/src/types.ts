@@ -41,6 +41,8 @@ export interface Forecast {
   date: string;
   hour: number;
   timestamp: string;
+  utc_cycle_time: string; // Add this line if it's missing
+  imported_at: string; // Ensure this field is included
 }
 
 export interface DailyForecast {

@@ -1,132 +1,90 @@
-import React, { useState } from 'react';
-import WeatherIcon from './WeatherIcon';
-import HourlyPanel from './HourlyPanel';
-import { DailyForecast, WeatherState } from '../../types';
-import { FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
-import './MountainDailyPanel.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// src/components/Weather/MountainDailyPanel.tsx
 
-// Utility function imports (import these from your utility file if they exist there)
-import { roundToNearestWhole, getCardinalDirection, formatDate, calculateTotalPrecipitation, getWeatherIconState } from '../../utils/Utils'; // Adjust the import path accordingly
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import axiosInstance from '../../utils/axiosInstance';
+import { isAxiosError, getAxiosErrorMessage } from '../../utils/axiosError';
+import DailyPanel from '../../components/Weather/DailyPanel';
+import CurrentPanel from '../../components/Weather/CurrentPanel';
+import { Container, Alert, Spinner } from 'react-bootstrap';
+import './MountainWeatherPage.css';
+import '../../components/Weather/HourlyPanel.css';
+import '../../components/Weather/DailyPanel.css';
+import { Forecast, DailyForecast } from '../../types';
+import { filterAndSortForecasts, aggregateDailyData } from '../../utils/weatherUtils';
 
-interface MountainDailyPanelProps {
-  forecasts: DailyForecast[];
+interface RouteParams extends Record<string, string | undefined> {
+  continent: string;
+  country: string;
+  region: string;
+  subregion: string;
   mountain: string;
-  showHeaders: boolean;
 }
 
-const MountainDailyPanel: React.FC<MountainDailyPanelProps> = ({ forecasts, mountain, showHeaders }) => {
-  const [expandedDate, setExpandedDate] = useState<string | null>(null);
-  const [showAll, setShowAll] = useState<boolean>(false);
+const capitalizeFirstLetter = (string: string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+};
 
-  const toggleExpanded = (date: string) => {
-    setExpandedDate(expandedDate === date ? null : date);
-  };
+const MountainDailyPanel: React.FC = () => {
+  const { continent, country, region, subregion, mountain } = useParams<RouteParams>();
+  const [hourlyWeatherData, setHourlyWeatherData] = useState<Forecast[]>([]);
+  const [dailyWeatherData, setDailyWeatherData] = useState<DailyForecast[]>([]);
+  const [currentWeatherData, setCurrentWeatherData] = useState<Forecast | null>(null);
+  const [nextWeatherData, setNextWeatherData] = useState<Forecast[]>([]); // Add state for next forecasts
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const toggleShowAll = () => {
-    setShowAll(prevShowAll => !prevShowAll);
-  };
+  useEffect(() => {
+    const fetchWeatherData = async () => {
+      setLoading(true);
+      try {
+        const response = await axiosInstance.get(`/en/weather/${continent}/${country}/${region}/${subregion}/${mountain}/`);
+        const hourlyData: Forecast[] = response.data.forecasts;
+        const currentDate = new Date();
 
-  const getAlertMessage = (maxTemp: number, date: string) => {
-    if (maxTemp < -10) {
-      return (
-        <div className="alert-zone alert-cold-wave d-flex align-items-center justify-content-between w-100">
-          <span className="d-flex align-items-center">
-            <FaExclamationTriangle color="blue" /> Cold Wave
-          </span>
-          <a href="#" onClick={() => toggleExpanded(date)} className="btn btn-primary btn-sm ml-3">
-            Hourly
-          </a>
-        </div>
-      );
-    } else if (maxTemp < 0) {
-      return (
-        <div className="alert-zone alert-freeze d-flex align-items-center justify-content-between w-100">
-          <span className="d-flex align-items-center">
-            <FaExclamationTriangle color="cyan" /> Freezing
-          </span>
-          <a href="#" onClick={() => toggleExpanded(date)} className="btn btn-primary btn-sm ml-3">
-            Hourly
-          </a>
-        </div>
-      );
-    } else {
-      return (
-        <div className="alert-zone alert-no-alert d-flex align-items-center justify-content-between w-100">
-          <span className="d-flex align-items-center">
-            <FaCheckCircle color="green" /> No Alerts
-          </span>
-          <a href="#" onClick={() => toggleExpanded(date)} className="btn btn-primary btn-sm ml-3">
-            Hourly
-          </a>
-        </div>
-      );
-    }
-  };
+        const filteredData = filterAndSortForecasts(hourlyData).filter(forecast => {
+          const forecastDateTime = new Date(`${forecast.date}T${String(forecast.hour).padStart(2, '0')}:00:00`);
+          return forecastDateTime >= currentDate || forecast.date > currentDate.toISOString().split('T')[0];
+        });
 
-  const currentDate = new Date();
-  const startOfDay = new Date(currentDate.setHours(0, 0, 0, 0));
-  const visibleForecasts = showAll ? forecasts : forecasts.slice(0, 7);
-  const filteredForecasts = visibleForecasts.filter(({ date }) => new Date(date) >= startOfDay);
+        const aggregatedData = aggregateDailyData(filteredData);
+        setHourlyWeatherData(filteredData);
+        setDailyWeatherData(aggregatedData);
+        setCurrentWeatherData(filteredData[0]);
+        setNextWeatherData(filteredData.slice(1, 4)); // Set the next few hours of forecasts
+        setError(null);
+      } catch (err: unknown) {
+        console.error('Error fetching weather data:', err);
+        if (isAxiosError(err)) {
+          setError(getAxiosErrorMessage(err));
+        } else {
+          setError('Unknown error');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const forecastComponents = filteredForecasts.map(({ date, generalText, maxTemp, minTemp, hourlyForecasts }) => {
-    const totalPrecipitation = calculateTotalPrecipitation({ date, generalText, maxTemp, minTemp, hourlyForecasts });
-    const generalIconState = getWeatherIconState(
-      generalText,
-      hourlyForecasts[0]?.forecast_data.high_cloud_cover_level_0_highCloudLayer || 0,
-      hourlyForecasts[0]?.forecast_data.precipitation_rate_level_0_surface || 0
-    );
-
-    const alertMessage = getAlertMessage(maxTemp, date);
-
-    return (
-      <div key={date} className="row mb-3 forecast-row">
-        <div className="col-12">
-          <div className="d-flex flex-wrap align-items-center forecast-details">
-            <div className="col-md-2 col-sm-6 panel-date">{formatDate(date)}</div>
-            <div className="col-md-1 col-sm-6 d-flex align-items-center justify-content-center">
-              <WeatherIcon state={generalIconState} width={60} height={60} />
-            </div>
-            <div className="col-md-2 col-sm-6 temperature">
-              <span className={maxTemp > 32 ? 'text-danger' : ''}>{roundToNearestWhole(maxTemp)}°C</span> / <span>{roundToNearestWhole(minTemp)}°C</span>
-            </div>
-            <div className="col-md-2 col-sm-6 wind-direction">
-              {hourlyForecasts[0] && hourlyForecasts[0].wind_direction !== null && hourlyForecasts[0].wind_speed !== null && (
-                <>
-                  <span style={{ transform: `rotate(${hourlyForecasts[0].wind_direction}deg)` }}>↑</span>
-                  {getCardinalDirection(hourlyForecasts[0].wind_direction)} {hourlyForecasts[0].wind_speed.toFixed(1)} m/s
-                </>
-              )}
-            </div>
-            <div className="col-md-2 col-sm-6 precipitation">
-              Precipitation: {totalPrecipitation.toFixed(2)} mm
-            </div>
-          </div>
-          <div className="alert-line w-100 mt-2">{alertMessage}</div>
-          {expandedDate === date && (
-            <div className="expanded-section">
-              <HourlyPanel forecasts={hourlyForecasts} />
-            </div>
-          )}
-          <hr />
-        </div>
-      </div>
-    );
-  });
+    fetchWeatherData();
+  }, [continent, country, region, subregion, mountain]);
 
   return (
-    <div className="mountain-daily-panel container">
-      {showHeaders && <h2 className="text-center my-4">Daily Weather Forecast for {mountain}</h2>}
-      {forecastComponents}
-      {forecasts.length > 7 && (
-        <div className="text-center mt-3">
-          <button className="btn btn-secondary" onClick={toggleShowAll}>
-            {showAll ? 'Show Less' : 'Show More'}
-          </button>
+    <Container>
+      <h1 className="text-center my-4">Weather for {capitalizeFirstLetter(mountain || '')}</h1>
+      {loading && (
+        <div className="text-center">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
         </div>
       )}
-    </div>
+      {error && <Alert variant="danger">{error}</Alert>}
+      {currentWeatherData && <CurrentPanel forecast={currentWeatherData} nextForecasts={nextWeatherData} />}
+      {dailyWeatherData.length > 0 && <DailyPanel forecasts={dailyWeatherData} country={mountain || 'Unknown'} showHeaders={false} />}
+    </Container>
   );
 };
 
 export default MountainDailyPanel;
+
+export {};

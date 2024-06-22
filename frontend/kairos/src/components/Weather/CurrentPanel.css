@@ -1,0 +1,31 @@
+.current-panel {
+  background-color: #1b547e; /* Dark blue background */
+  color: white; /* White text color */
+  border: none; /* Remove card border */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  padding: 20px; /* Add padding */
+}
+
+.current-panel-header {
+  background-color: #1b547e; /* Darker blue for the header */
+  border-bottom: none; /* Remove header border */
+  color: white; /* White text color */
+  font-size: 1.2rem; /* Increase font size */
+  padding: 10px 20px; /* Add padding */
+  border-top-left-radius: 10px; /* Rounded corners */
+  border-top-right-radius: 10px; /* Rounded corners */
+}
+
+.current-panel-title {
+  font-size: 2.5rem; /* Larger font size for the temperature */
+  font-weight: bold; /* Bold font weight */
+  margin-bottom: 15px; /* Add margin below */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle text shadow */
+}
+
+.current-panel .card-text {
+  font-size: 1.1rem; /* Slightly larger text for better readability */
+  margin-bottom: 10px; /* Add margin below each text */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle text shadow */
+}
