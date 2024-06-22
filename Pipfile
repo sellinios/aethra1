@@ -10,6 +10,13 @@ django-environ = "==0.11.2"
 gunicorn = "==22.0.0"
 psycopg2-binary = "==2.9.9"
 django-cors-headers = "*"
+environs = "*"
+djangorestframework-simplejwt = "*"
+celery = "*"
+django-parler = "*"
+django-celery-beat = "*"
+unidecode = "*"
+requests = "*"
 
 [dev-packages]
 flake8 = "*"
