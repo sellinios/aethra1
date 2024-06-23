@@ -1,36 +1,40 @@
+// src/components/Logo.tsx
 import React from 'react';
+import WeatherIcon from './Weather/WeatherIcon';
 
 const Logo: React.FC = () => {
     const logoStyle: React.CSSProperties = {
-        backgroundColor: 'orange',
-        color: 'black',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '10px',
+        borderRadius: '5px',
+    };
+
+    const textContainerStyle: React.CSSProperties = {
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '60px', // Increased width
-        height: '60px', // Increased height
-        borderRadius: '5px',
-        textAlign: 'center',
-        padding: '5px', // Added padding
+        marginRight: '10px',
     };
 
-    const kTextStyle: React.CSSProperties = {
-        fontSize: '36px', // Increased font size for "K"
-        fontWeight: 'bold',
-        lineHeight: '1',
+    const mainTextStyle: React.CSSProperties = {
+        fontSize: '40px',
+        color: 'lightskyblue',
+        margin: 0,
     };
 
-    const weatherTextStyle: React.CSSProperties = {
-        fontSize: '14px', // Increased font size for "Weather"
-        marginTop: '-5px', // Adjusted margin-top for closer positioning
-        color: 'black', // Changed color to white
+    const subTextStyle: React.CSSProperties = {
+        fontSize: '15px',
+        color: 'white',
+        marginTop: '-5px',
     };
 
     return (
         <div style={logoStyle}>
-            <div style={kTextStyle}>K</div>
-            <div style={weatherTextStyle}>Weather</div>
+            <div style={textContainerStyle}>
+                <div style={mainTextStyle}>Kairos</div>
+                <div style={subTextStyle}>www.kairos.gr</div>
+            </div>
+            <WeatherIcon state="rainy" width={60} height={60} color="orange" />
         </div>
     );
 };

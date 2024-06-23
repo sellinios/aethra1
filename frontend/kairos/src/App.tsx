@@ -22,11 +22,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (isConsentGiven) {
-            const script = document.createElement('script');
-            script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3131616609445146';
-            script.async = true;
-            script.crossOrigin = 'anonymous';
-            document.body.appendChild(script);
+            // AdSense script is already in the HTML head, no need to add it here again.
         }
     }, [isConsentGiven]);
 
