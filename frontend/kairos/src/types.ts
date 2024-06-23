@@ -26,7 +26,7 @@ export interface ForecastData {
   v_component_of_wind_level_10_heightAboveGround: number | null;
   total_precipitation_level_0_surface?: number;
   convective_precipitation_level_0_surface?: number;
-  convective_precitation_rate_level_0_surface?: number;
+  convective_precipitation_rate_level_0_surface?: number; // Corrected typo
   maximum_temperature_level_2_heightAboveGround?: number;
   minimum_temperature_level_2_heightAboveGround?: number;
   convective_available_potential_energy_level_0_surface?: number;
@@ -45,15 +45,26 @@ export interface Forecast {
   timestamp: string;
   utc_cycle_time: string;
   imported_at: string;
-  state: WeatherState; // Add this line to include the state property
+  state: WeatherState;
 }
 
+export interface HourlyForecast {
+  date: string;
+  hour: number;
+  temperature_celsius: number;
+  wind_speed: number | null;
+  wind_direction: number | null;
+  forecast_data: ForecastData;
+}
 export interface DailyForecast {
   date: string;
-  minTemp: number;
   maxTemp: number;
+  minTemp: number;
   generalText: string;
-  hourlyForecasts: Forecast[];
+  high_cloud_cover_level_0_highCloudLayer?: number;
+  precipitation_rate_level_0_surface?: number;
+  convective_precipitation_rate_level_0_surface?: number;
+  hourlyForecasts: HourlyForecast[];
 }
 
 export interface CityWeather {

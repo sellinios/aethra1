@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import WeatherIcon from './WeatherIcon';
 import HourlyPanel from './HourlyPanel';
-import { DailyForecast, WeatherState } from '../../types';
+import { DailyForecast, Forecast } from '../../types';
 import { FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
 import './HourlyPanel.css';
 import './DailyPanel.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { roundToNearestWhole, getWindDirection, calculateTotalPrecipitation, getWeatherIconState, formatDate } from '../../utils/weatherUtils';
+import { roundToNearestWhole, getWindDirection, calculateTotalPrecipitation, getWeatherIconState, formatDate, windSpeedToBeaufort, getPrecipitationType } from '../../utils/weatherUtils';
 
 interface DailyPanelProps {
   forecasts: DailyForecast[];
@@ -74,10 +74,15 @@ const DailyPanel: React.FC<DailyPanelProps> = ({ forecasts, country, showHeaders
       generalText,
       hourlyForecasts[0]?.forecast_data.high_cloud_cover_level_0_highCloudLayer || 0,
       hourlyForecasts[0]?.forecast_data.precipitation_rate_level_0_surface || 0,
-      hourlyForecasts[0]?.forecast_data.convective_precitation_rate_level_0_surface || 0 // Corrected typo
+      hourlyForecasts[0]?.forecast_data.convective_precipitation_rate_level_0_surface ?? 0
     );
 
     const alertMessage = getAlertMessage(maxTemp, date);
+
+    const precipitationType = getPrecipitationType(
+      hourlyForecasts[0]?.forecast_data.precipitation_rate_level_0_surface,
+      hourlyForecasts[0]?.forecast_data.convective_precipitation_rate_level_0_surface
+    );
 
     return (
       <div key={date} className="row mb-3 forecast-row">
@@ -94,18 +99,18 @@ const DailyPanel: React.FC<DailyPanelProps> = ({ forecasts, country, showHeaders
               {hourlyForecasts[0] && hourlyForecasts[0].wind_direction !== null && hourlyForecasts[0].wind_speed !== null && (
                 <>
                   <span style={{ transform: `rotate(${hourlyForecasts[0].wind_direction}deg)` }}>↑</span>
-                  {getWindDirection(hourlyForecasts[0].wind_direction)} {hourlyForecasts[0].wind_speed.toFixed(1)} m/s
+                  {getWindDirection(hourlyForecasts[0].wind_direction)} {`${roundToNearestWhole(hourlyForecasts[0].wind_speed)} km/h (Beaufort: ${windSpeedToBeaufort(roundToNearestWhole(hourlyForecasts[0].wind_speed))})`}
                 </>
               )}
             </div>
             <div className="col-md-2 col-sm-6 precipitation">
-              Precipitation: {totalPrecipitation.toFixed(2)} mm
+              Rain: {precipitationType}
             </div>
           </div>
           <div className="alert-line w-100 mt-2">{alertMessage}</div>
           {expandedDate === date && (
             <div className="expanded-section">
-              <HourlyPanel forecasts={hourlyForecasts} />
+              <HourlyPanel forecasts={hourlyForecasts as Forecast[]} />
             </div>
           )}
           <hr />

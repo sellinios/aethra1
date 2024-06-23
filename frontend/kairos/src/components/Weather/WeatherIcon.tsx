@@ -47,6 +47,7 @@ const WeatherIcon: React.FC<WeatherIconProps> = ({ state, width, height, color =
       case 'fog':
         return RseFog;
       case 'lightning':
+      case 'storm': // Add new storm state
         return RseThunder;
       case 'clear-night':
         return RseClearNight;

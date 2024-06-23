@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table, Spinner, Alert } from 'react-bootstrap';
-import CitiesWeatherRow from './CitiesWeatherRow';
-import { DailyForecast } from '../types';
+import WeatherIcon from './Weather/WeatherIcon';
+import { DailyForecast, CityWeather } from '../types';
 import './CitiesWeather.css';
-import { filterAndSortForecasts, aggregateDailyData, getVisibleDays } from '../utils/weatherUtils';
-
-interface CityWeather {
-  city: string;
-  forecasts: DailyForecast[];
-}
+import { filterAndSortForecasts, aggregateDailyData, getVisibleDays, getWeatherIconState } from '../utils/weatherUtils';
 
 const CitiesWeather: React.FC = () => {
   const [weatherData, setWeatherData] = useState<CityWeather[]>([]);
@@ -65,6 +60,12 @@ const CitiesWeather: React.FC = () => {
     .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
     .filter(date => date >= currentDate);
 
+  const cityLinks: { [key: string]: string } = {
+    athens: 'http://kairos.gr/weather/europe/greece/attica/municipality-of-athens/athens/',
+    patra: 'http://kairos.gr/weather/europe/greece/peloponnese/municipality-of-patras/patra/',
+    thessaloniki: 'http://kairos.gr/weather/europe/greece/central-macedonia/municipality-of-thessaloniki/thessaloniki/'
+  };
+
   return (
     <div className="container">
       {loading && <Spinner animation="border" />}
@@ -81,7 +82,35 @@ const CitiesWeather: React.FC = () => {
           </thead>
           <tbody>
             {weatherData.map((cityWeather, index) => (
-              <CitiesWeatherRow key={index} city={cityWeather.city} forecasts={cityWeather.forecasts} sortedDates={visibleDays} />
+              <tr key={index}>
+                <td>
+                  <a href={cityLinks[cityWeather.city.toLowerCase()]} target="_blank" rel="noopener noreferrer">
+                    {cityWeather.city}
+                  </a>
+                </td>
+                {visibleDays.map((date, index) => {
+                  const forecast = cityWeather.forecasts.find(forecast => forecast.date === date);
+
+                  if (!forecast) {
+                    return <td key={index} className="text-center">N/A</td>;
+                  }
+
+                  const weatherIconState = getWeatherIconState(
+                    forecast.generalText,
+                    forecast.hourlyForecasts[0]?.forecast_data.high_cloud_cover_level_0_highCloudLayer || 0,
+                    forecast.hourlyForecasts[0]?.forecast_data.precipitation_rate_level_0_surface || 0,
+                    forecast.hourlyForecasts[0]?.forecast_data.convective_precipitation_rate_level_0_surface || 0
+                  );
+
+                  return (
+                    <td key={index} className="text-center">
+                      {`${Math.round(forecast.maxTemp)}°C / ${Math.round(forecast.minTemp)}°C`}
+                      <br />
+                      <WeatherIcon state={weatherIconState} width={24} height={24} />
+                    </td>
+                  );
+                })}
+              </tr>
             ))}
           </tbody>
         </Table>

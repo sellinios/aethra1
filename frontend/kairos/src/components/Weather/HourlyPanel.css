@@ -1,24 +1,38 @@
 .hourly-panel {
-  background-color: #f8f9fa; /* Light background */
-  border: 1px solid #ddd; /* Light border */
-  border-radius: 10px; /* Rounded corners */
-  padding: 10px; /* Add padding */
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 1rem 0;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.forecast-card {
-  background-color: #e9ecef; /* Slightly darker background for forecast rows */
-  border-radius: 5px; /* Rounded corners */
-  padding: 10px; /* Add padding */
+.hourly-panel .header,
+.hourly-panel .forecast-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
 }
 
-.hour-title, .temperature-title, .precipitation-title, .wind-title, .cloud-title {
-  font-weight: bold; /* Bold font weight */
+.hourly-panel .header {
+  background-color: #e9ecef;
+  font-weight: bold;
+  border-bottom: 1px solid #dee2e6;
 }
 
-.hour, .temperature, .precipitation, .wind, .cloudiness {
-  font-size: 1rem; /* Regular font size */
+.hourly-panel .forecast-row {
+  background-color: #ffffff;
+  border-bottom: 1px solid #dee2e6;
 }
 
-.weather-icon {
-  margin-right: 5px; /* Add margin to the right of the icon */
+.hourly-panel .column {
+  flex: 1;
+  text-align: center;
+}
+
+.hourly-panel .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

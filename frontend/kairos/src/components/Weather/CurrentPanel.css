@@ -30,11 +30,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px; /* Add gap between elements */
+  gap: 10px; /* Add gap between elements */
 }
 
 .horizontal-layout {
   display: flex;
+  flex-wrap: wrap; /* Allow items to wrap to the next line */
   justify-content: space-around; /* Spread out the forecast items */
   align-items: center;
   padding: 10px; /* Add padding */
@@ -46,10 +47,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0 10px; /* Add margin between items */
+  margin: 5px; /* Add margin between items */
   color: white; /* Ensure text color is white */
+  flex: 1 1 60px; /* Flex-grow, flex-shrink, and flex-basis for responsiveness */
 }
 
 .weather-icon {
-  margin-bottom: 15px; /* Add margin below the icon */
+  margin-bottom: 5px; /* Adjust margin below the icon */
 }

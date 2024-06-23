@@ -1,6 +1,4 @@
-// src/utils/weatherUtils.ts
-
-import { Forecast, DailyForecast, WeatherState } from '../types';
+import { Forecast, DailyForecast, HourlyForecast, WeatherState } from '../types';
 
 export const filterAndSortForecasts = (hourlyData: Forecast[]): Forecast[] => {
   const latestCycleMap: Record<string, Forecast> = {};
@@ -39,7 +37,7 @@ export const aggregateDailyData = (hourlyData: Forecast[]): DailyForecast[] => {
 
     dailyDataMap[date].maxTemp = Math.max(dailyDataMap[date].maxTemp, data.temperature_celsius);
     dailyDataMap[date].minTemp = Math.min(dailyDataMap[date].minTemp, data.temperature_celsius);
-    dailyDataMap[date].hourlyForecasts.push(data);
+    dailyDataMap[date].hourlyForecasts.push(data as HourlyForecast); // Cast to HourlyForecast
   });
 
   return Object.values(dailyDataMap);
@@ -57,27 +55,32 @@ export const getVisibleDays = (width: number, dates: string[]) => {
   }
 };
 
-export const getWeatherIconState = (description: string, cloudCover: number | null, precipitation: number | null, convectivePrecipitation: number | null): WeatherState => {
+export const getWeatherIconState = (
+  description: string | undefined,
+  cloudCover: number | null,
+  precipitation: number | null,
+  convectivePrecipitation: number | null
+): WeatherState => {
   if (convectivePrecipitation && convectivePrecipitation > 0) {
     return 'lightning';
   }
-  if (precipitation && precipitation > 0 || /rain|storm/.test(description.toLowerCase())) {
+  if ((precipitation && precipitation > 0) || (description && /rain|storm/.test(description.toLowerCase()))) {
     return 'rainy';
   }
-  if (/snow/.test(description.toLowerCase())) {
+  if (description && /snow/.test(description.toLowerCase())) {
     return 'snowy';
   }
-  if (/fog/.test(description.toLowerCase())) {
+  if (description && /fog/.test(description.toLowerCase())) {
     return 'fog';
   }
-  if (/hail/.test(description.toLowerCase())) {
+  if (description && /hail/.test(description.toLowerCase())) {
     return 'hail';
   }
-  if (/thunder/.test(description.toLowerCase())) {
+  if (description && /thunder/.test(description.toLowerCase())) {
     return 'lightning';
   }
   if (cloudCover !== null && cloudCover < 25) {
-    return /night/.test(description.toLowerCase()) ? 'clear-night' : 'sunny';
+    return description && /night/.test(description.toLowerCase()) ? 'clear-night' : 'sunny';
   }
   if (cloudCover !== null && cloudCover < 50) {
     return 'partlycloudy';
@@ -103,4 +106,47 @@ export const formatDate = (dateString: string) => {
 
 export const roundToNearestWhole = (num: number): number => {
   return Math.round(num);
+};
+
+export const windSpeedToBeaufort = (speed: number) => {
+  if (speed < 1) return 0;
+  else if (speed <= 5) return 1;
+  else if (speed <= 11) return 2;
+  else if (speed <= 19) return 3;
+  else if (speed <= 28) return 4;
+  else if (speed <= 38) return 5;
+  else if (speed <= 49) return 6;
+  else if (speed <= 61) return 7;
+  else if (speed <= 74) return 8;
+  else if (speed <= 88) return 9;
+  else if (speed <= 102) return 10;
+  else if (speed <= 117) return 11;
+  else return 12;
+};
+
+export const validateAndFormatCycleTime = (utcCycleTime: string): string => {
+  const validCycleTimes = ['00', '06', '12', '18'];
+  return validCycleTimes.includes(utcCycleTime) ? utcCycleTime : '00';
+};
+
+export const getPrecipitationType = (
+  precipitation: number | null | undefined,
+  convectivePrecipitation: number | null | undefined
+): string => {
+  const roundedPrecipitation = precipitation !== null && precipitation !== undefined
+    ? roundToNearestWhole(precipitation)
+    : convectivePrecipitation !== null && convectivePrecipitation !== undefined
+    ? roundToNearestWhole(convectivePrecipitation)
+    : 'N/A';
+
+  const isTrace = roundedPrecipitation === 0 && ((precipitation ?? 0) > 0 || (convectivePrecipitation ?? 0) > 0);
+
+  if (isTrace) {
+    if ((precipitation ?? 0) > 0) {
+      return 'Trace (Precipitation)';
+    }
+    return 'Trace (Convective)';
+  }
+
+  return `${roundedPrecipitation} mm/h`;
 };

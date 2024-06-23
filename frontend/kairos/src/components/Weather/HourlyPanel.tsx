@@ -1,9 +1,9 @@
 import React from 'react';
-import { WiDaySunny } from 'react-icons/wi';
-import './HourlyPanel.css'; // Import your custom CSS
+import WeatherIcon from './WeatherIcon';
+import './HourlyPanel.css';
 import { Forecast } from '../../types';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
-import { roundToNearestWhole, getWindDirection } from '../../utils/weatherUtils';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { roundToNearestWhole, getWindDirection, getWeatherIconState, windSpeedToBeaufort, getPrecipitationType } from '../../utils/weatherUtils';
 
 interface HourlyPanelProps {
   forecasts: Forecast[];
@@ -19,34 +19,47 @@ const HourlyPanel: React.FC<HourlyPanelProps> = ({ forecasts }) => {
 
   return (
     <div className="hourly-panel container">
-      <div className="row mb-3">
-        <div className="col-12 d-flex flex-wrap align-items-center justify-content-between p-3 forecast-card">
-          <div className="hour-title me-3">Hour</div>
-          <div className="temperature-title me-3">Temperature</div>
-          <div className="precipitation-title me-3">Precipitation</div>
-          <div className="wind-title me-3">Wind</div>
-          <div className="cloud-title">Cloudiness</div>
-        </div>
+      <div className="header">
+        <div className="column">Hour</div>
+        <div className="column">Temperature</div>
+        <div className="column">Rain</div>
+        <div className="column">Wind</div>
+        <div className="column">Cloudiness</div>
       </div>
-      {filteredForecasts.map((forecast) => (
-        <div key={forecast.id} className="row mb-3">
-          <div className="col-12 d-flex flex-wrap align-items-center justify-content-between p-3 forecast-card">
-            <div className="hour me-3">{String(forecast.hour).padStart(2, '0')}:00</div>
-            <div className="d-flex align-items-center me-3">
-              <WiDaySunny className="me-2 weather-icon" /> {forecast.temperature_celsius !== null ? roundToNearestWhole(forecast.temperature_celsius) : 'N/A'} °C
+      {filteredForecasts.map((forecast) => {
+        const roundedWindSpeed = Math.round(forecast.wind_speed || 0);
+        const beaufortScale = windSpeedToBeaufort(roundedWindSpeed);
+        const precipitationType = getPrecipitationType(
+          forecast.forecast_data.precipitation_rate_level_0_surface,
+          forecast.forecast_data.convective_precipitation_rate_level_0_surface
+        );
+
+        return (
+          <div key={forecast.id} className="forecast-row">
+            <div className="column">{String(forecast.hour).padStart(2, '0')}:00</div>
+            <div className="column icon">
+              <WeatherIcon
+                state={getWeatherIconState(
+                  forecast.state,
+                  forecast.forecast_data.high_cloud_cover_level_0_highCloudLayer,
+                  forecast.forecast_data.precipitation_rate_level_0_surface,
+                  forecast.forecast_data.convective_precipitation_rate_level_0_surface ?? 0
+                )}
+                width={30}
+                height={30}
+              />
+              {forecast.temperature_celsius !== null ? roundToNearestWhole(forecast.temperature_celsius) : 'N/A'} °C
             </div>
-            <div className="d-flex align-items-center me-3">
-              {forecast.forecast_data.precipitation_rate_level_0_surface !== null ? roundToNearestWhole(forecast.forecast_data.precipitation_rate_level_0_surface) : 'N/A'} mm/h
+            <div className="column">{precipitationType}</div>
+            <div className="column">
+              {forecast.wind_speed !== null ? `${getWindDirection(forecast.wind_direction)} ${roundedWindSpeed} km/h (Beaufort: ${beaufortScale})` : 'N/A'}
             </div>
-            <div className="d-flex align-items-center me-3">
-              {forecast.wind_speed !== null ? `${getWindDirection(forecast.wind_direction)} ${roundToNearestWhole(forecast.wind_speed)} m/s` : 'N/A'}
-            </div>
-            <div className="d-flex align-items-center">
+            <div className="column">
               {forecast.forecast_data.high_cloud_cover_level_0_highCloudLayer !== null ? `${roundToNearestWhole(forecast.forecast_data.high_cloud_cover_level_0_highCloudLayer)} %` : 'N/A'}
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
