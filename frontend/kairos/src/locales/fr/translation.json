@@ -1,0 +1,18 @@
+{
+  "home": "Accueil",
+  "login": "Connexion",
+  "register": "Inscription",
+  "city": "Ville",
+  "na": "N/A",
+  "error_fetching_weather_data": "Erreur lors de la récupération des données météorologiques.",
+  "athens": "Athènes",
+  "patra": "Patras",
+  "thessaloniki": "Thessalonique",
+  "find_my_nearest_place": "Trouver mon lieu le plus proche",
+  "loading": "Chargement...",
+  "nearest_place": "Lieu le plus proche",
+  "failed_to_fetch_nearest_place": "Échec de la récupération du lieu le plus proche.",
+  "failed_to_get_location": "Échec de l'obtention de la localisation.",
+  "geolocation_not_supported": "La géolocalisation n'est pas supportée par ce navigateur."
+}
+

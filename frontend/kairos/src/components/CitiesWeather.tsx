@@ -5,8 +5,10 @@ import WeatherIcon from './Weather/WeatherIcon';
 import { DailyForecast, CityWeather } from '../types';
 import './CitiesWeather.css';
 import { filterAndSortForecasts, aggregateDailyData, getVisibleDays, getWeatherIconState } from '../utils/weatherUtils';
+import { useTranslation } from 'react-i18next';
 
 const CitiesWeather: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [weatherData, setWeatherData] = useState<CityWeather[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,7 @@ const CitiesWeather: React.FC = () => {
   }, [weatherData]);
 
   useEffect(() => {
-    const langCode = 'en'; // Change this dynamically based on the user's language preference
+    const langCode = i18n.language; // Get the current language
     const cities = ['athens', 'thessaloniki', 'patra']; // Update city slugs here
     const fetchWeatherData = async () => {
       try {
@@ -46,14 +48,14 @@ const CitiesWeather: React.FC = () => {
         setWeatherData(cityWeatherData);
         setError(null);
       } catch (err) {
-        setError('Error fetching weather data.');
+        setError(t('error_fetching_weather_data'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchWeatherData();
-  }, []);
+  }, [i18n.language]);
 
   const currentDate = new Date().toISOString().split('T')[0];
   const sortedDates = Array.from(new Set(weatherData.flatMap(cityWeather => cityWeather.forecasts.map(forecast => forecast.date))))
@@ -74,9 +76,9 @@ const CitiesWeather: React.FC = () => {
         <Table striped bordered hover responsive>
           <thead>
             <tr>
-              <th>City</th>
+              <th>{t('city')}</th>
               {visibleDays.map((date, index) => (
-                <th key={index}>{new Date(date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</th>
+                <th key={index}>{new Date(date).toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })}</th>
               ))}
             </tr>
           </thead>
@@ -85,14 +87,14 @@ const CitiesWeather: React.FC = () => {
               <tr key={index}>
                 <td>
                   <a href={cityLinks[cityWeather.city.toLowerCase()]} target="_blank" rel="noopener noreferrer">
-                    {cityWeather.city}
+                    {t(cityWeather.city.toLowerCase())}
                   </a>
                 </td>
                 {visibleDays.map((date, index) => {
                   const forecast = cityWeather.forecasts.find(forecast => forecast.date === date);
 
                   if (!forecast) {
-                    return <td key={index} className="text-center">N/A</td>;
+                    return <td key={index} className="text-center">{t('na')}</td>;
                   }
 
                   const weatherIconState = getWeatherIconState(

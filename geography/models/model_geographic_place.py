@@ -42,7 +42,6 @@ class GeographicPlace(TranslatableModel):
         if not self.elevation:
             self.elevation = 0
 
-        # Save the instance to get the primary key if it doesn't have one yet
         if not self.pk:
             super().save(*args, **kwargs)
 

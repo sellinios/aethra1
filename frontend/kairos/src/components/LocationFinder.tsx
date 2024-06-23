@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Place {
     name: string;
@@ -21,6 +22,7 @@ interface Place {
 }
 
 const LocationFinder: React.FC = () => {
+    const { t } = useTranslation();
     const [nearestPlace, setNearestPlace] = useState<Place | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -50,7 +52,7 @@ const LocationFinder: React.FC = () => {
             localStorage.setItem('locationData', JSON.stringify(data));
         } catch (error) {
             console.error('Error fetching nearest place:', error);
-            setError('Failed to fetch nearest place.');
+            setError(t('failed_to_fetch_nearest_place'));
         } finally {
             setLoading(false);
         }
@@ -65,12 +67,12 @@ const LocationFinder: React.FC = () => {
                 },
                 error => {
                     console.error('Error getting location', error);
-                    setError('Failed to get location.');
+                    setError(t('failed_to_get_location'));
                     setLoading(false);
                 }
             );
         } else {
-            setError('Geolocation is not supported by this browser.');
+            setError(t('geolocation_not_supported'));
         }
     };
 
@@ -96,12 +98,12 @@ const LocationFinder: React.FC = () => {
             {error && <div className="alert alert-danger">{error}</div>}
             {!nearestPlace && (
                 <button onClick={handleLocation} disabled={loading}>
-                    {loading ? 'Loading...' : 'Find My Nearest Place'}
+                    {loading ? t('loading') : t('find_my_nearest_place')}
                 </button>
             )}
             {nearestPlace && (
                 <div className="alert alert-success" role="alert">
-                    <strong>Nearest Place:</strong> (Lat: {formatCoordinate(nearestPlace.latitude)}, Long: {formatCoordinate(nearestPlace.longitude)}){' '}
+                    <strong>{t('nearest_place')}:</strong> (Lat: {formatCoordinate(nearestPlace.latitude)}, Long: {formatCoordinate(nearestPlace.longitude)}){' '}
                     <a href={getWeatherUrl(nearestPlace)}>{nearestPlace.name}</a>
                 </div>
             )}

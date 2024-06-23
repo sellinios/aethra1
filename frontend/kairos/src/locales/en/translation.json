@@ -1,0 +1,17 @@
+{
+  "home": "Home",
+  "login": "Login",
+  "register": "Register",
+  "city": "City",
+  "na": "N/A",
+  "athens": "Athens",
+  "patra": "Patra",
+  "thessaloniki": "Thessaloniki",
+  "error_fetching_weather_data": "Error fetching weather data.",
+  "find_my_nearest_place": "Find My Nearest Place",
+  "loading": "Loading...",
+  "nearest_place": "Nearest Place",
+  "failed_to_fetch_nearest_place": "Failed to fetch nearest place.",
+  "failed_to_get_location": "Failed to get location.",
+  "geolocation_not_supported": "Geolocation is not supported by this browser."
+}

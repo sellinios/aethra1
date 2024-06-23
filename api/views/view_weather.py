@@ -57,8 +57,15 @@ def weather_for_place(request, lang_code, continent, country, region, subregion,
 
         serializer = GFSForecastSerializer(adjusted_forecasts, many=True)
 
+        # Debug: Check if the translations are correct
+        place_name = place.safe_translation_getter('name', lang_code, 'en')
+        place_category = place.category.safe_translation_getter('name', lang_code, 'en')
+        print(f"Place Name in {lang_code}: {place_name}")
+        print(f"Category Name in {lang_code}: {place_category}")
+
         return Response({
-            'place': place.safe_translation_getter('name', lang_code, 'en'),
+            'place': place_name,
+            'category': place_category,  # Include the category name
             'forecasts': serializer.data
         })
 

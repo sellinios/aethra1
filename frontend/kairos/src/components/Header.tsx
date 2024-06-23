@@ -1,10 +1,15 @@
+// src/components/Header.tsx
 import React from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import Logo from './Logo'; // Adjust the path if necessary
-import './Header.css'; // Import the custom CSS
+import { useTranslation } from 'react-i18next';
+import Logo from './Logo';
+import './Header.css';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Header: React.FC = () => {
+    const { t } = useTranslation();
+
     return (
         <header className="header">
             <Navbar bg="dark" variant="dark" expand="lg">
@@ -16,13 +21,16 @@ const Header: React.FC = () => {
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="ml-auto">
                             <Nav.Item>
-                                <Nav.Link as={Link} to="/">Home</Nav.Link>
+                                <Nav.Link as={Link} to="/">{t('home')}</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link as={Link} to="/login">Login</Nav.Link>
+                                <Nav.Link as={Link} to="/login">{t('login')}</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link as={Link} to="/register">Register</Nav.Link>
+                                <Nav.Link as={Link} to="/register">{t('register')}</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <LanguageSwitcher />
                             </Nav.Item>
                         </Nav>
                     </Navbar.Collapse>
