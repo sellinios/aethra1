@@ -1,4 +1,3 @@
-# api/management/commands/import_places.py
 import time
 from multiprocessing import Pool
 from django.core.management.base import BaseCommand
@@ -20,7 +19,7 @@ class Command(BaseCommand):
         # Define the bounding box for Greece
         min_lat, max_lat = 34.802066, 41.748878
         min_lng, max_lng = 19.316406, 28.256348
-        interval = 0.0001  # Roughly equal to 10 meters
+        interval = 0.001
 
         # Default category
         default_category, created = GeographicCategory.objects.get_or_create(
@@ -42,7 +41,7 @@ class Command(BaseCommand):
         self.stdout.write(f'Total places to insert: {total_steps}')
 
         # Divide the task into chunks for parallel processing
-        chunk_size = 1000000  # Adjust based on memory and performance
+        chunk_size = 100000  # Adjust based on memory and performance
         lat_chunks = [lat_steps[i:i + chunk_size] for i in range(0, len(lat_steps), chunk_size)]
 
         with Pool() as pool:
@@ -55,6 +54,9 @@ def process_chunk(lat_chunk, lng_steps, default_category, default_division):
     places = []
     for lat in lat_chunk:
         for lng in lng_steps:
+            # Round latitude and longitude to six decimal places
+            lat = round(lat, 6)
+            lng = round(lng, 6)
             place = GeographicPlace(
                 longitude=lng,
                 latitude=lat,
@@ -62,7 +64,7 @@ def process_chunk(lat_chunk, lng_steps, default_category, default_division):
                 admin_division=default_division
             )
             places.append(place)
-            if len(places) >= 10000:  # Batch insert every 1000 places
+            if len(places) >= 10000:  # Batch insert every 10000 places
                 GeographicPlace.objects.bulk_create(places)
                 places = []
 
@@ -71,5 +73,5 @@ def process_chunk(lat_chunk, lng_steps, default_category, default_division):
 
 def frange(start, stop, step):
     while start < stop:
-        yield start
+        yield round(start, 6)  # Ensure step values are rounded to six decimal places
         start += step

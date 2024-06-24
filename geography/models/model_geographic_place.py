@@ -1,3 +1,4 @@
+# model_geographic_place.py
 from django.db import models
 from django.contrib.gis.db import models as gis_models
 from django.contrib.gis.geos import Point
@@ -37,6 +38,16 @@ class GeographicPlace(TranslatableModel):
         if not self.admin_division:
             raise ValidationError('Place must be associated with a GeographicDivision.')
 
+        # Validate latitude and longitude
+        if not (-90 <= self.latitude <= 90):
+            raise ValidationError('Latitude must be between -90 and 90 degrees.')
+        if not (-180 <= self.longitude <= 180):
+            raise ValidationError('Longitude must be between -180 and 180 degrees.')
+
+        # Ensure no more than six decimal places
+        self.latitude = round(self.latitude, 6)
+        self.longitude = round(self.longitude, 6)
+
     def save(self, *args, **kwargs):
         self.clean()
         self.location = Point(self.longitude, self.latitude, srid=4326)
@@ -46,7 +57,8 @@ class GeographicPlace(TranslatableModel):
         if not self.pk:
             super().save(*args, **kwargs)
 
-        for lang_code, _ in self.get_available_languages():
+        for lang in self.get_available_languages():
+            lang_code = lang if isinstance(lang, str) else lang[0]
             self.set_current_language(lang_code)
             if not self.safe_translation_getter('name', any_language=True):
                 self.name = "To Be Defined"

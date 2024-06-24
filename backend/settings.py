@@ -99,7 +99,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-LANGUAGE_CODE = 'el'
+LANGUAGE_CODE = 'en'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
@@ -141,8 +141,8 @@ SIMPLE_JWT = {
 
 from django.utils.translation import gettext_lazy as _
 LANGUAGES = [
-    ('el', _('Greek')),
     ('en', _('English')),
+    ('el', _('Greek')),
     ('fr', _('French')),
     ('es', _('Spanish')),
     ('de', _('German')),
