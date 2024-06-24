@@ -37,3 +37,4 @@ This is the Aethra project, a Django application with a React frontend.
 
 psql -U sellinios -d aethradb
 TRUNCATE TABLE geography_geographicdivision RESTART IDENTITY CASCADE;
+TRUNCATE TABLE geography_geographicplace RESTART IDENTITY CASCADE;

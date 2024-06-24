@@ -63,6 +63,7 @@ const LocationFinder: React.FC = () => {
             navigator.geolocation.getCurrentPosition(
                 position => {
                     const { latitude, longitude } = position.coords;
+                    console.log(`Geolocation obtained: Latitude ${latitude}, Longitude ${longitude}`);
                     fetchNearestPlace(latitude, longitude);
                 },
                 error => {

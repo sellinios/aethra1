@@ -39,6 +39,8 @@ DATABASES = {
     },
 }
 
+GOOGLE_API_KEY = env('GOOGLE_API_KEY')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
