@@ -5,9 +5,10 @@ from .models.model_geographic_place import GeographicPlace
 from .models.model_geographic_category import GeographicCategory
 from .models.model_geographic_division import GeographicDivision
 
+@admin.register(GeographicPlace)
 class GeographicPlaceAdmin(TranslatableAdmin):
     list_display = ('name', 'longitude', 'latitude', 'elevation', 'confirmed', 'category', 'admin_division')
-    search_fields = ('translations__name', 'translations__slug', 'category__name', 'admin_division__name')
+    search_fields = ('translations__name', 'translations__slug', 'category__translations__name', 'admin_division__name')
     list_filter = ('confirmed', 'category', 'admin_division')
 
     fieldsets = (
@@ -24,11 +25,19 @@ class GeographicPlaceAdmin(TranslatableAdmin):
             obj.slug = slugify(obj.name)
         super().save_model(request, obj, form, change)
 
+@admin.register(GeographicCategory)
+class GeographicCategoryAdmin(TranslatableAdmin):
+    list_display = ('name', 'slug')
+    search_fields = ('translations__name',)
+
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'slug')
+        }),
+    )
+
+@admin.register(GeographicDivision)
 class GeographicDivisionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'level_name', 'parent')
+    list_display = ('name', 'slug', 'level_name', 'parent')
     search_fields = ('name', 'slug', 'level_name', 'parent__name')
     list_filter = ('level_name', 'parent')
-
-admin.site.register(GeographicPlace, GeographicPlaceAdmin)
-admin.site.register(GeographicCategory)
-admin.site.register(GeographicDivision, GeographicDivisionAdmin)

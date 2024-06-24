@@ -35,3 +35,5 @@ This is the Aethra project, a Django application with a React frontend.
 - tree -L 7 -I 'node_modules|build'
 - pip freeze > requirements.txt
 
+psql -U sellinios -d aethradb
+TRUNCATE TABLE geography_geographicdivision RESTART IDENTITY CASCADE;

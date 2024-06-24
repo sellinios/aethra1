@@ -30,7 +30,8 @@ class GeographicPlace(TranslatableModel):
         ]
 
     def __str__(self):
-        return f"{self.safe_translation_getter('name', any_language=True)} ({self.latitude}, {self.longitude})"
+        name = self.safe_translation_getter('name', any_language=True)
+        return f"{name or 'Unnamed Place'} ({self.latitude}, {self.longitude})"
 
     def clean(self):
         if not self.admin_division:
