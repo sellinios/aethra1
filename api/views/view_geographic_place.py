@@ -12,7 +12,7 @@ from django.utils.text import slugify
 logger = logging.getLogger(__name__)
 
 # Initialize the Google Maps client with your API key
-gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
+# gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
 
 @api_view(['GET'])
 def nearest_place(request, lang_code):
