@@ -9,6 +9,7 @@ class GeographicDivision(models.Model):
     level_name = models.CharField(max_length=255)
     name_variations = ArrayField(models.CharField(max_length=255), default=list, blank=True)
     geographic_data = models.ForeignKey('GeographicData', null=True, blank=True, on_delete=models.SET_NULL, related_name='divisions')
+    confirmed = models.BooleanField(default=False)  # Added confirmed field
 
     def __str__(self):
         return self.name
