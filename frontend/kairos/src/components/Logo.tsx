@@ -34,7 +34,7 @@ const Logo: React.FC = () => {
                 <div style={mainTextStyle}>Kairos</div>
                 <div style={subTextStyle}>www.kairos.gr</div>
             </div>
-            <WeatherIcon state="WIND" width={60} height={60} color="orange" />
+            <WeatherIcon state="wind" width={60} height={60} color="orange" />
         </div>
     );
 };

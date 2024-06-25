@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from 'react-bootstrap';
 import { Forecast } from '../../types';
 import './CurrentPanel.css';
-import WeatherIcon from './WeatherIcon'; // Correct import
+import WeatherIcon from './WeatherIconC'; // Correct import
 import { getWindDirection, getWeatherIconState, windSpeedToBeaufort, validateAndFormatCycleTime } from '../../utils/weatherUtils';
 
 interface CurrentPanelProps {
@@ -30,7 +30,7 @@ const getColorForWeatherState = (state: string) => {
       return 'darkblue';
     case 'partlycloudy':
       return 'lightblue';
-    case 'windy':
+    case 'wind':
       return 'green';
     default:
       return 'black';

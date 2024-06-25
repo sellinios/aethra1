@@ -1,4 +1,4 @@
-// src/utils.ts
+// src/utils/weatherUtils.ts
 import { Forecast, DailyForecast, WeatherState } from '../types';
 
 export const roundToNearestWhole = (num: number): number => {
