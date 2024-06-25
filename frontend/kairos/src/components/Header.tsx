@@ -1,10 +1,10 @@
+// src/components/Header.tsx
 import React from 'react';
-import { Navbar, Nav, Container } from 'react-bootstrap';
+import { Navbar, Container, Nav } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import Logo from './Logo';
-import './Header.css';
 import LanguageSwitcher from './LanguageSwitcher';
+import Logo from './Logo';
 
 const Header: React.FC = () => {
     const { t } = useTranslation();

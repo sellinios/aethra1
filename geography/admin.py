@@ -15,13 +15,15 @@ import googlemaps
 # Initialize the Google Maps client with your API key
 gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
 
+
 @admin.action(description='Update elevation, name, and municipality')
 def update_elevation_and_name(modeladmin, request, queryset):
     for place in queryset:
         try:
             now = timezone.now()
             geocode_record, created = GeocodeResult.objects.get_or_create(geographic_place=place)
-            needs_update = not geocode_record.geocode_last_updated or (now - geocode_record.geocode_last_updated).days > 30  # Update if older than 30 days
+            needs_update = not geocode_record.geocode_last_updated or (
+                        now - geocode_record.geocode_last_updated).days > 30  # Update if older than 30 days
 
             if needs_update:
                 # Get elevation
@@ -30,7 +32,8 @@ def update_elevation_and_name(modeladmin, request, queryset):
                     place.elevation = round(elevation_result[0]['elevation'], 2)  # Round elevation to 2 decimal places
 
                 # Get place details
-                places_result = gmaps.places_nearby(location=(place.latitude, place.longitude), rank_by='distance', keyword='point of interest')
+                places_result = gmaps.places_nearby(location=(place.latitude, place.longitude), rank_by='distance',
+                                                    keyword='point of interest')
                 if places_result['results']:
                     google_place = places_result['results'][0]
                     place_details = gmaps.place(place_id=google_place['place_id'])
@@ -61,17 +64,22 @@ def update_elevation_and_name(modeladmin, request, queryset):
                                 found_municipality = True
                                 break
                             except GeographicDivision.DoesNotExist:
-                                modeladmin.message_user(request, f"Municipality {municipality_name} not found in the database.", level='warning')
+                                modeladmin.message_user(request,
+                                                        f"Municipality {municipality_name} not found in the database.",
+                                                        level='warning')
 
                     if not found_municipality:
                         # Log the entire geocode result for debugging
-                        modeladmin.message_user(request, f"No locality found in geocode result for place: {place.name}. Full geocode result: {geocode_result}", level='warning')
+                        modeladmin.message_user(request,
+                                                f"No locality found in geocode result for place: {place.name}. Full geocode result: {geocode_result}",
+                                                level='warning')
 
             # Save the updated place
             place.save()
             modeladmin.message_user(request, f"Updated place: {place.name}")
         except Exception as e:
             modeladmin.message_user(request, f"Error updating place: {str(e)}", level='error')
+
 
 @admin.register(GeographicPlace)
 class GeographicPlaceAdmin(TranslatableAdmin):
@@ -82,7 +90,8 @@ class GeographicPlaceAdmin(TranslatableAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'slug', 'longitude', 'latitude', 'elevation', 'confirmed', 'category', 'admin_division', 'location')
+            'fields': (
+            'name', 'slug', 'longitude', 'latitude', 'elevation', 'confirmed', 'category', 'admin_division', 'location')
         }),
     )
 
@@ -93,6 +102,12 @@ class GeographicPlaceAdmin(TranslatableAdmin):
         if not obj.safe_translation_getter('slug', any_language=True):
             obj.slug = slugify(obj.name)
         super().save_model(request, obj, form, change)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "admin_division":
+            kwargs["queryset"] = GeographicDivision.objects.order_by('name')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 @admin.register(GeographicCategory)
 class GeographicCategoryAdmin(TranslatableAdmin):
@@ -105,6 +120,7 @@ class GeographicCategoryAdmin(TranslatableAdmin):
         }),
     )
 
+
 @admin.register(GeographicDivision)
 class GeographicDivisionAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'level_name', 'parent', 'geographic_data_display')
@@ -113,4 +129,5 @@ class GeographicDivisionAdmin(admin.ModelAdmin):
 
     def geographic_data_display(self, obj):
         return obj.geographic_data
+
     geographic_data_display.short_description = 'Geographic Data'

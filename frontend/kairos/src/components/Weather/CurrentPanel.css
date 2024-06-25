@@ -54,4 +54,5 @@
 
 .weather-icon {
   margin-bottom: 5px; /* Adjust margin below the icon */
+  /* Remove fill property to avoid conflicts */
 }

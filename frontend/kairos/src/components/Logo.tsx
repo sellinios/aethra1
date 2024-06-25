@@ -1,6 +1,6 @@
 // src/components/Logo.tsx
 import React from 'react';
-import WeatherIcon from './Weather/WeatherIcon';
+import WeatherIcon from './Weather/WeatherIcon'; // Ensure this is the correct import
 
 const Logo: React.FC = () => {
     const logoStyle: React.CSSProperties = {
@@ -34,7 +34,7 @@ const Logo: React.FC = () => {
                 <div style={mainTextStyle}>Kairos</div>
                 <div style={subTextStyle}>www.kairos.gr</div>
             </div>
-            <WeatherIcon state="rainy" width={60} height={60} color="orange" />
+            <WeatherIcon state="WIND" width={60} height={60} color="orange" />
         </div>
     );
 };

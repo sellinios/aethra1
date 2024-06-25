@@ -38,22 +38,47 @@ const WeatherIcon: React.FC<WeatherIconProps> = ({ state, width, height, color =
     switch (state) {
       case 'sunny':
         return RseClearDay;
-      case 'cloudy':
-        return RseCloudy;
-      case 'rainy':
-        return RseRain;
-      case 'snowy':
-        return RseSnow;
-      case 'fog':
-        return RseFog;
-      case 'lightning':
-      case 'storm': // Add new storm state
-        return RseThunder;
       case 'clear-night':
         return RseClearNight;
+      case 'cloudy':
+        return RseCloudy;
+      case 'fog':
+        return RseFog;
+      case 'hail':
+        return RseHail;
       case 'partlycloudy':
         return RsePartlyCloudyDay;
-      case 'windy':
+      case 'partlycloudy-night':
+        return RsePartlyCloudyNight;
+      case 'rain':
+        return RseRain;
+      case 'rainsnow':
+        return RseRainSnow;
+      case 'rainsnowshowersday':
+        return RseRainSnowShowersDay;
+      case 'rainsnowshowersnight':
+        return RseRainSnowShowersNight;
+      case 'showersday':
+        return RseShowersDay;
+      case 'showersnight':
+        return RseShowersNight;
+      case 'sleet':
+        return RseSleet;
+      case 'snow':
+        return RseSnow;
+      case 'snowshowersday':
+        return RseSnowShowersDay;
+      case 'snowshowersnight':
+        return RseSnowShowersNight;
+      case 'thunder':
+        return RseThunder;
+      case 'thunderrain':
+        return RseThunderRain;
+      case 'thundershowersday':
+        return RseThunderShowersDay;
+      case 'thundershowersnight':
+        return RseThunderShowersNight;
+      case 'wind':
         return RseWind;
       default:
         return RseCloudy;
