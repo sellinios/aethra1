@@ -1,4 +1,3 @@
-// src/App.tsx
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import CookieConsent from 'react-cookie-consent';
@@ -11,6 +10,7 @@ import Search from './components/Search';
 import SearchResultsPage from './pages/SearchResultPage';
 import Register from './components/Register';
 import Login from './components/Login';
+import GreekMunicipalities from './components/GreekMunicipalities'; // Import the new component
 
 const App: React.FC = () => {
     const [isConsentGiven, setIsConsentGiven] = useState(localStorage.getItem('cookieConsent') === 'true');
@@ -38,6 +38,7 @@ const App: React.FC = () => {
                     <Route path="/search" element={<SearchResultsPage />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/geography/greece/municipalities" element={<GreekMunicipalities />} /> {/* Add this line */}
                 </Routes>
                 <Footer />
                 <CookieConsent
