@@ -1,5 +1,3 @@
-# admin.py
-import googlemaps
 from django.contrib import admin
 from django.utils.text import slugify
 from parler.admin import TranslatableAdmin
@@ -10,6 +8,9 @@ from .models.model_geographic_place import GeographicPlace
 from .models.model_geographic_geocode import GeocodeResult
 from .models.model_geographic_category import GeographicCategory
 from .models.model_geographic_division import GeographicDivision
+from .models.model_geographic_data import GeographicData  # Assuming this is the correct import
+
+import googlemaps
 
 # Initialize the Google Maps client with your API key
 gmaps = googlemaps.Client(key=settings.GOOGLE_API_KEY)
@@ -106,6 +107,10 @@ class GeographicCategoryAdmin(TranslatableAdmin):
 
 @admin.register(GeographicDivision)
 class GeographicDivisionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'level_name', 'parent')
+    list_display = ('name', 'slug', 'level_name', 'parent', 'geographic_data_display')
     search_fields = ('name', 'slug', 'level_name', 'parent__name')
     list_filter = ('level_name', 'parent')
+
+    def geographic_data_display(self, obj):
+        return obj.geographic_data
+    geographic_data_display.short_description = 'Geographic Data'

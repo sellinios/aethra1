@@ -7,7 +7,8 @@ class GeographicDivision(models.Model):
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='children')
     level_name = models.CharField(max_length=255)
-    name_variations = ArrayField(models.CharField(max_length=255), default=list, blank=True)  # Add this field
+    name_variations = ArrayField(models.CharField(max_length=255), default=list, blank=True)
+    geographic_data = models.ForeignKey('GeographicData', null=True, blank=True, on_delete=models.SET_NULL, related_name='divisions')
 
     def __str__(self):
         return self.name

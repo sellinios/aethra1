@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
+    'django.contrib.postgres',
     'django.contrib.gis',
     'rest_framework_simplejwt.token_blacklist',
     'api',
