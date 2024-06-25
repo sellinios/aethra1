@@ -1,11 +1,16 @@
+// src/components/GreekMunicipalities.tsx
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Container } from 'react-bootstrap';
-import './GreekMunicipalities.css'; // Import the CSS file
+import { Container, Row, Col } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet';
+import './GreekMunicipalities.css';
 
 interface Municipality {
     name: string;
     slug: string;
+    url: string;
 }
 
 interface Region {
@@ -14,32 +19,46 @@ interface Region {
 }
 
 const GreekMunicipalities: React.FC = () => {
+    const { t } = useTranslation();
     const [regions, setRegions] = useState<Region[]>([]);
+    const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        axios.get('/api/geography/greece/municipalities/')
+    const fetchMunicipalities = () => {
+        axios.get<Region[]>(`/api/geography/greece/municipalities/`)
             .then(response => {
-                console.log('Response Data:', response.data); // Log the response data
                 setRegions(response.data);
             })
             .catch(error => {
+                setError(t('error_fetching_municipalities'));
                 console.error('There was an error fetching the municipalities!', error);
             });
+    };
+
+    useEffect(() => {
+        fetchMunicipalities();
     }, []);
 
     return (
         <Container>
-            <h1>Greek Municipalities</h1>
+            <Helmet>
+                <title>{t('municipalities_of_greece')}</title>
+            </Helmet>
+            <h1>{t('municipalities_of_greece')}</h1>
+            {error && <p className="error-message">{error}</p>}
             {regions.map(region => (
-                <div key={region.name} className="region">
+                <div key={region.name}>
                     <h2 className="region-title">{region.name}</h2>
-                    <div className="municipalities-list">
+                    <Row>
                         {region.municipalities.map(municipality => (
-                            <div key={municipality.slug} className="municipality">
-                                <h5>{municipality.name}</h5>
-                            </div>
+                            <Col key={municipality.slug} sm={12} md={6} lg={4}>
+                                <div className="municipality">
+                                    <h5>
+                                        <a href={municipality.url || "#"}>{municipality.name}</a>
+                                    </h5>
+                                </div>
+                            </Col>
                         ))}
-                    </div>
+                    </Row>
                 </div>
             ))}
         </Container>

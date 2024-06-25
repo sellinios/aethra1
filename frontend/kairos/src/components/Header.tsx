@@ -1,5 +1,3 @@
-// src/components/Header.tsx
-
 import React from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
@@ -25,13 +23,19 @@ const Header: React.FC = () => {
                                 <Nav.Link as={Link} to="/">{t('home')}</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
+                                <Nav.Link as={Link} to="/about">{t('about')}</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link as={Link} to="/contact">{t('contact')}</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link as={Link} to="/geography/greece/municipalities">{t('municipalities')}</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
                                 <Nav.Link as={Link} to="/login">{t('login')}</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
                                 <Nav.Link as={Link} to="/register">{t('register')}</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link as={Link} to="/geography/greece/municipalities">{t('municipalities')}</Nav.Link> {/* Add this line */}
                             </Nav.Item>
                             <Nav.Item>
                                 <LanguageSwitcher />

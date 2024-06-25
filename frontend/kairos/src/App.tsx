@@ -10,7 +10,9 @@ import Search from './components/Search';
 import SearchResultsPage from './pages/SearchResultPage';
 import Register from './components/Register';
 import Login from './components/Login';
-import GreekMunicipalities from './components/GreekMunicipalities'; // Import the new component
+import AboutPage from './pages/AboutPage'; // Import AboutPage component
+import ContactPage from './pages/ContactPage'; // Import ContactPage component
+import GreekMunicipalities from './components/GreekMunicipalities';
 
 const App: React.FC = () => {
     const [isConsentGiven, setIsConsentGiven] = useState(localStorage.getItem('cookieConsent') === 'true');
@@ -34,11 +36,13 @@ const App: React.FC = () => {
                 <Search />
                 <Routes>
                     <Route path="/" element={<HomePage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/geography/greece/municipalities" element={<GreekMunicipalities />} />
                     <Route path="/weather/:continent/:country/:region/:subregion/:city" element={<WeatherPage />} />
                     <Route path="/search" element={<SearchResultsPage />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/login" element={<Login />} />
-                    <Route path="/geography/greece/municipalities" element={<GreekMunicipalities />} /> {/* Add this line */}
                 </Routes>
                 <Footer />
                 <CookieConsent

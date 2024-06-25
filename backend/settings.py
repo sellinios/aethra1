@@ -148,11 +148,6 @@ LANGUAGES = [
     ('es', _('Spanish')),
     ('de', _('German')),
     ('it', _('Italian')),
-    ('pt', _('Portuguese')),
-    ('zh-hans', _('Simplified Chinese')),
-    ('ja', _('Japanese')),
-    ('ko', _('Korean')),
-    ('ru', _('Russian')),
 ]
 
 PARLER_LANGUAGES = {
@@ -163,11 +158,6 @@ PARLER_LANGUAGES = {
         {'code': 'es', 'fallbacks': ['en']},
         {'code': 'de', 'fallbacks': ['en']},
         {'code': 'it', 'fallbacks': ['en']},
-        {'code': 'pt', 'fallbacks': ['en']},
-        {'code': 'zh-hans', 'fallbacks': ['en']},
-        {'code': 'ja', 'fallbacks': ['en']},
-        {'code': 'ko', 'fallbacks': ['en']},
-        {'code': 'ru', 'fallbacks': ['en']},
     ),
     'default': {
         'fallback': 'en',

@@ -34,3 +34,9 @@ class GeographicPlaceWithUrlSerializer(serializers.ModelSerializer):
         continent_slug = admin_division.parent.parent.parent.slug
 
         return f"/weather/{continent_slug}/{country_slug}/{region_slug}/{subregion_slug}/{city_slug}/"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if representation['url'] is None or not instance.confirmed:
+            return None
+        return representation
