@@ -11,9 +11,13 @@ const MapComponent: React.FC = () => {
     useEffect(() => {
         // Fetch weather data here
         const fetchData = async () => {
-            const response = await fetch('/api/weather-data'); // Adjust the endpoint
-            const data = await response.json();
-            setTemperatureData(data);
+            try {
+                const response = await fetch('/api/weather-data'); // Adjust the endpoint
+                const data = await response.json();
+                setTemperatureData(data);
+            } catch (error) {
+                console.error("Error fetching weather data:", error);
+            }
         };
 
         fetchData();
